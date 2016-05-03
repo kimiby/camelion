@@ -30,7 +30,7 @@ CML_Error CML_NodeSetName(CML_Node * node, char * value)
 
     if (value)
     {
-        node->name = malloc(strlen(name) + 1);
+        node->name = malloc(strlen(value) + 1);
         if (!node->name)
             return CML_ERROR_USER_BADALLOC;
         strcpy(node->name, value);
