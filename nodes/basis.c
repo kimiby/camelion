@@ -105,9 +105,23 @@ CML_Error CML_NodeCopy(CML_Node * node, CML_Node ** dest)
 
 CML_Error CML_NodeRemove(CML_Node * node, uint32_t index)
 {
-    ///@todo
-}
+    CHECKPTR(node);
 
+    if ((node->type != CML_TYPE_ARRAY) &&
+        (node->type != CML_TYPE_HASH))
+        return CML_ERROR_USER_BADTYPE;
+
+    if (node->ncount <= index)
+        return CML_ERROR_USER_BADVALUE;
+
+    CHECKERR(CML_NodeFree(node->nodes[index]));
+
+    uint32_t i;
+    for (i = index; i < (node->ncount - 1); i++)
+        node->nodes[i] = node->nodes[i + 1];
+
+    return CML_ERROR_SUCCESS;
+}
 
 CML_Error CML_NodeAppend(CML_Node * node, CML_Node * child)
 {
