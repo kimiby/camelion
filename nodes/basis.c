@@ -132,14 +132,7 @@ CML_Error CML_NodeAppend(CML_Node * node, CML_Node * child)
         (node->type != CML_TYPE_HASH))
         return CML_ERROR_USER_BADTYPE;
 
-    CML_Node ** oldptr = node->nodes;
-    node->nodes = realloc(node->nodes,
-                          sizeof(CML_Node *) * (node->ncount + 1));
-    if (!node->nodes)
-    {
-        node->nodes = oldptr;
-        return CML_ERROR_USER_BADALLOC;
-    }
+    EXTENDNODE(node, 1);
 
     node->nodes[node->ncount++] = child;
 
@@ -149,5 +142,21 @@ CML_Error CML_NodeAppend(CML_Node * node, CML_Node * child)
 
 CML_Error CML_NodeInsert(CML_Node * node, CML_Node * child, uint32_t pos)
 {
-    ///@todo
+    CHECKPTR(node);
+    CHECKPTR(child);
+
+    if ((node->type != CML_TYPE_ARRAY) ||
+        (node->type != CML_TYPE_HASH))
+        return CML_ERROR_USER_BADTYPE;
+
+    if (node->ncount < pos)
+        return CML_ERROR_USER_BADVALUE;
+
+    EXTENDNODE(node, 1);
+
+    uint32_t i;
+    for (i = node->ncount; i > pos; i--)
+        node->nodes[i] = node->nodes[i - 1];
+
+    return CML_ERROR_SUCCESS;
 }
