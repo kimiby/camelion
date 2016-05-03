@@ -98,9 +98,38 @@ CML_Error CML_NodeFree(CML_Node * node)
     return CML_ERROR_SUCCESS;
 }
 
-CML_Error CML_NodeCopy(CML_Node * node, CML_Node ** dest)
+CML_Error CML_NodeCopy(CML_Node * node, CML_Node ** dest, CML_Bool recursive)
 {
-    ///@todo
+    CHECKPTR(node);
+    CHECKPTR(dest);
+
+    CHECKERR(CML_NodeCreate(node->type, dest));
+    CHECKERR(CML_NodeSetName(*dest, node->name));
+
+    switch (node->type)
+    {
+    case CML_TYPE_UNDEF  : break;
+    case CML_TYPE_INTEGER:
+        CHECKERR(CML_NodeSetInteger(*dest, node->data.integer));
+        break;
+    case CML_TYPE_STRING :
+        CHECKERR(CML_NodeSetString(*dest, node->data.string));
+        break;
+    case CML_TYPE_ARRAY  :
+    case CML_TYPE_HASH   :
+        if (recursive)
+        {
+            uint32_t i;
+            for (i = 0; i < node->ncount; i++)
+            {
+                CML_Node * child;
+                CHECKERR(CML_NodeCopy(node->nodes[i], &child, CML_TRUE));
+                CHECKERR(CML_NodeAppend(*dest, child));
+            }
+        }
+    }
+
+    return CML_ERROR_SUCCESS;
 }
 
 CML_Error CML_NodeRemove(CML_Node * node, uint32_t index)
