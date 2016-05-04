@@ -31,7 +31,8 @@
     CML(USER_BADALLOC       , (0x10 + 0x01), "Memory allocation failed      ") \
     CML(USER_BADPOINTER     , (0x10 + 0x02), "Bad pointer provided          ") \
     CML(USER_BADTYPE        , (0x10 + 0x03), "Bad type provided             ") \
-    CML(USER_BADVALUE       , (0x10 + 0x04), "bad value provided            ") \
+    CML(USER_BADVALUE       , (0x10 + 0x04), "Bad value provided            ") \
+    CML(USER_BADSTRING      , (0x10 + 0x05), "Bad string provided           ") \
                                                                                \
     CML(SYSTEM_CANNOTEXECUTE, (0x7E),        "Command invoked cannot execute") \
     CML(SYSTEM_NOTFOUND     , (0x7F),        "Command not found             ") \

@@ -2,7 +2,17 @@
 #define TOOLS_H
 
 #define CHECKPTR(X)                         \
-    if (!X) return CML_ERROR_USER_BADPOINTER;
+    if (!X) return CML_ERROR_USER_BADPOINTER
+#define CHECKSTR(X)                         \
+    if (!X) return CML_ERROR_USER_BADSTRING
+#define CHECKJAR(X)                         \
+    if (((X)->type != CML_TYPE_HASH) &&     \
+        ((X)->type != CML_TYPE_ARRAY))      \
+        return CML_ERROR_USER_BADTYPE;
+#define CHECKTYP(X)                         \
+    if (((X) < CML_TYPE_FIRST) ||           \
+        ((X) > CML_TYPE_LAST ))             \
+        return CML_ERROR_USER_BADTYPE
 #define CHECKERR(X)                         \
 {                                           \
     CML_Error _res = X;                     \
@@ -23,6 +33,6 @@
     }                                       \
 }
 #define CHECKMEM(X)                         \
-    if (!X) return CML_ERROR_USER_BADALLOC;
+    if (!X) return CML_ERROR_USER_BADALLOC
 
 #endif // TOOLS_H

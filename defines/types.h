@@ -32,7 +32,8 @@
     CML_TYPE_ARRAY,
     CML_TYPE_HASH,
 
-    CML_TYPE_LAST = CML_TYPE_HASH
+    CML_TYPE_FIRST = CML_TYPE_UNDEF,
+    CML_TYPE_LAST  = CML_TYPE_HASH
 } CML_Type;
 
 /* E */ typedef struct CML_Node

@@ -5,48 +5,85 @@
 #include "../nodes/find.h"
 #include "../defines/tools.h"
 
-static CML_Error path_curr(char * path, char ** result)
+static char * path_curr(char * path)
 {
-    CHECKPTR(path);
-    CHECKPTR(result);
-
     char   * delpos = strchr(path, CML_FIND_DELIMETER);
     uint32_t intpos;
-    intpos = delpos ? strlen(path) : delpos - path;
-    *result = malloc(++intpos);
-    CHECKMEM(*result);
-    strcpy(*result, path + pos);
-
-    return CML_ERROR_SUCCESS;
+    intpos = delpos ? strlen(path) : (uint32_t)(delpos - path);
+    return path + intpos;
 }
 
-static CML_Error path_next(char * path, char ** result)
+static char * path_next(char * path)
 {
     char * delpos = strchr(path, CML_FIND_DELIMETER);
     return delpos ? delpos + 1 : NULL;
 }
 
-CML_Error CML_NodeFindUndef(char * path, CML_Node * result)
+CML_Error CML_NodeFindIndex(CML_Node * node, char * name, uint32_t * index)
 {
-    ///@todo
+    CHECKPTR(node );
+    CHECKSTR(name );
+    CHECKPTR(index);
+    CHECKJAR(node );
+
+    uint32_t i;
+    for (i = 0; i < node->ncount; i++)
+    if (!strcmp(node->nodes[i]->name, name))
+    {
+        *index = i;
+        return CML_ERROR_SUCCESS;
+    }
+
+    return CML_ERROR_USER_BADSTRING;
 }
 
-CML_Error CML_NodeFindHash(char * path, CML_Node * result)
+CML_Error CML_NodeFind(CML_Node * node, char * path, CML_Node ** result, CML_Type type)
 {
-    ///@todo
+    CHECKPTR(node  );
+    CHECKTYP(type  );
+    CHECKPTR(result);
+
+    char * next = path_next(path);
+    char * curr = path_curr(path);
+    uint32_t index;
+
+    CHECKERR(CML_NodeFindIndex(node, curr, &index));
+
+    if (next) /* go deeper */
+        CHECKERR(CML_NodeFind(node->nodes[index], next, result, type))
+    else /* stay here */
+    {
+        if (node->nodes[index]->type == type)
+            *result = node->nodes[index];
+        else
+            return CML_ERROR_USER_BADTYPE;
+    }
+
+
+    return CML_ERROR_SUCCESS;
 }
 
-CML_Error CML_NodeFindArray(char * path, CML_Node * result)
+CML_Error CML_NodeFindUndef(CML_Node * node, char * path, CML_Node ** result)
 {
-    ///@todo
+    return CML_NodeFind(node, path, result, CML_TYPE_UNDEF);
 }
 
-CML_Error CML_NodeFindString(char * path, CML_Node * result)
+CML_Error CML_NodeFindHash(CML_Node * node, char * path, CML_Node ** result)
 {
-    ///@todo
+    return CML_NodeFind(node, path, result, CML_TYPE_HASH);
 }
 
-CML_Error CML_NodeFindInteger(char * path, CML_Node * result)
+CML_Error CML_NodeFindArray(CML_Node * node, char * path, CML_Node ** result)
 {
-    ///@todo
+    return CML_NodeFind(node, path, result, CML_TYPE_ARRAY);
+}
+
+CML_Error CML_NodeFindString(CML_Node * node, char * path, CML_Node ** result)
+{
+    return CML_NodeFind(node, path, result, CML_TYPE_STRING);
+}
+
+CML_Error CML_NodeFindInteger(CML_Node * node, char * path, CML_Node ** result)
+{
+    return CML_NodeFind(node, path, result, CML_TYPE_INTEGER);
 }

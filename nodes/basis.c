@@ -6,9 +6,7 @@
 CML_Error CML_NodeCreate(CML_Type type, CML_Node ** result)
 {
     CHECKPTR(result);
-
-    if (type > CML_TYPE_LAST)
-        return CML_ERROR_USER_BADTYPE;
+    CHECKTYP(type);
 
     CML_Node * node = malloc(sizeof(CML_Node *));
     if (!node)
