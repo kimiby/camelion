@@ -23,21 +23,26 @@
 
 /* E+ */
 #define CML_X_ERROR_CODES \
+    /* No error                                                             */ \
     CML(SUCCESS             , (0x00),        "Successfull                   ") \
-                                                                               \
+    /* System general errors                                                */ \
     CML(SYSTEM_GENERALERROR , (0x01),        "Generic error                 ") \
     CML(SYSTEM_MISUSEOFBLTNS, (0x02),        "Misuse of shell built-ins     ") \
-    /* General errors                                                       */ \
+    /* User general errors                                                  */ \
     CML(USER_BADALLOC       , (0x10 + 0x01), "Memory allocation failed      ") \
     CML(USER_BADPOINTER     , (0x10 + 0x02), "Bad pointer provided          ") \
     CML(USER_BADTYPE        , (0x10 + 0x03), "Bad type provided             ") \
     CML(USER_BADVALUE       , (0x10 + 0x04), "Bad value provided            ") \
     CML(USER_BADSTRING      , (0x10 + 0x05), "Bad string provided           ") \
-                                                                               \
+    /* User file errors                                                     */ \
+    CML(USER_CANTOPENFILE   , (0x20 + 0x01), "Can't open file               ") \
+    CML(USER_CANTREADFILE   , (0x20 + 0x02), "Can't read file               ") \
+    CML(USER_CANTSEEKFILE   , (0x20 + 0x03), "can't seek file               ") \
+    /* System errors                                                        */ \
     CML(SYSTEM_CANNOTEXECUTE, (0x7E),        "Command invoked cannot execute") \
     CML(SYSTEM_NOTFOUND     , (0x7F),        "Command not found             ") \
     CML(SYSTEM_INVALIDEXIT  , (0x80),        "Invalid argument to exit      ") \
-                                                                               \
+    /* System signals                                                       */ \
     CML(SYSTEM_SIGHUP       , (0x80 + 0x01), "Hangup                        ") \
     CML(SYSTEM_SIGINT       , (0x80 + 0x02), "Interrupt                     ") \
     CML(SYSTEM_SIGQUIT      , (0x80 + 0x03), "Quit                          ") \

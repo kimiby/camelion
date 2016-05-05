@@ -1,4 +1,3 @@
-#ifndef TYPES_H
 /* «Camelion» - Perl storable/C struct back-and-forth translator
 *
 *  Copyright (C) Alexey Shishkin 2016
@@ -19,6 +18,7 @@
 *  along with Project «Camelion». If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef TYPES_H
 #define TYPES_H
 
 #include <stdint.h>
