@@ -33,7 +33,8 @@ SOURCES += \
     reader/read.c \
     nodes/basis.c \
     nodes/find.c \
-    helpers/info.c
+    helpers/info.c \
+    reader/write.c
 
 HEADERS += \
     defines/types.h \
@@ -45,7 +46,8 @@ HEADERS += \
     nodes/basis.h \
     nodes/find.h \
     helpers/info.h \
-    defines/tools.h
+    defines/tools.h \
+    reader/write.h
 
 OTHER_FILES += \
     scripts/generate_h.sh \
