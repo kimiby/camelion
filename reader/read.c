@@ -77,20 +77,6 @@ static CML_Error CML_FromFile(char * filename, char ** result)
     return CML_ERROR_SUCCESS;
 }
 
-CML_Error CML_StorableFromFile(char * filename, CML_Node ** result)
-{
-    CHECKPTR(filename);
-    CHECKPTR(result);
-
-    char * buffer;
-    CHECKERR(CML_FromFile(filename, &buffer));
-
-    CHECKERC(CML_StorableFromString(buffer, result), free(buffer));
-
-    free(buffer);
-    return CML_ERROR_SUCCESS;
-}
-
 static void comments_remove(char * string)
 {
     uint32_t i;
@@ -138,7 +124,7 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char * storable, uint32_t * 
     }
     else
     {
-        ///@todo implement stepped realloc
+        ///@fixme implement stepped realloc
         char val[0x1000];
         uint32_t valpos = 0;
 
@@ -273,10 +259,25 @@ CML_Error CML_StorableFromString(char * storable, CML_Node ** result)
     if (data[caret++] != '{')
         return CML_ERROR_USER_BADSTART;
 
-    ///@todo get strlen and then check everywhere
+    ///@fixme currentlyit's unsafe. Need func/macro to check borders for
+    ///       every character accessing.
 
     CHECKERR(CML_NodeCreate(CML_TYPE_HASH, result));
     CHECKERR(CML_NodeParse (*result, data, &caret));
 
+    return CML_ERROR_SUCCESS;
+}
+
+CML_Error CML_StorableFromFile(char * filename, CML_Node ** result)
+{
+    CHECKPTR(filename);
+    CHECKPTR(result);
+
+    char * buffer;
+    CHECKERR(CML_FromFile(filename, &buffer));
+
+    CHECKERC(CML_StorableFromString(buffer, result), free(buffer));
+
+    free(buffer);
     return CML_ERROR_SUCCESS;
 }

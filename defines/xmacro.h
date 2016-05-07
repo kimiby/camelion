@@ -38,6 +38,7 @@
     CML(USER_CANTOPENFILE   , (0x20 + 0x01), "Can't open file               ") \
     CML(USER_CANTREADFILE   , (0x20 + 0x02), "Can't read file               ") \
     CML(USER_CANTSEEKFILE   , (0x20 + 0x03), "Can't seek file               ") \
+    CML(USER_CANTWRITFILE   , (0x20 + 0x04), "Can't write to file           ") \
     /* User storable parsing errors                                         */ \
     CML(USER_BADSTART       , (0x30 + 0x01), "No storable signature found   ") \
     CML(USER_BADNAME        , (0x30 + 0x02), "Bad entity name               ") \
