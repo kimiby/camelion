@@ -18,12 +18,15 @@
 *  along with Project «Camelion». If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef NFREEZE_H
-#define NFREEZE_H
+#ifndef SWRITE_H
+#define SWRITE_H
 
+#include <stdint.h>
 #include "../defines/types.h"
 
-/* E */ CML_Error CML_NfreezeNode    (CML_Node * node, CML_Bytes ** result);
-/* E */ CML_Error CML_NfreezeStorable(char * storable, CML_Bytes ** result);
+CML_Error CML_SerialWriteUINT8 (CML_Bytes * bytes, uint8_t  value);
+CML_Error CML_SerialWriteUINT32(CML_Bytes * bytes, uint32_t value);
+CML_Error CML_SerialWriteINT32 (CML_Bytes * bytes, int32_t  value);
+CML_Error CML_SerialWriteString(CML_Bytes * bytes, char  *  value);
 
-#endif // NFREEZE_H
+#endif // SWRITE_H

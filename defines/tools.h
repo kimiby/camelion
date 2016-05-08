@@ -21,6 +21,8 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+#define UNUSED(X) (void)(X)
+
 #define CHECKPTR(X)                         \
     if (!X) return CML_ERROR_USER_BADPOINTER
 #define CHECKSTR(X)                         \

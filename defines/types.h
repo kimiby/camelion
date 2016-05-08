@@ -72,5 +72,6 @@ typedef enum
     CML_ERROR_LAST
 } CML_Error;
 #undef CML
+/* E- */
 
 #endif // TYPES_H
