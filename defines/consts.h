@@ -12,8 +12,8 @@
 #define CML_PERL_INT32    (0x09)
 #define CML_PERL_STRING   (0x0A)
 
-const uint8 signature[] = {0x05,
-                           0x09,
-                           0x03};
+const uint8_t signature[] = {0x05,
+                             0x09,
+                             0x03};
 
 #endif // CONSTS_H

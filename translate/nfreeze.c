@@ -19,6 +19,7 @@
 */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "../translate/nfreeze.h"
 #include "../reader/read.h"
