@@ -23,7 +23,7 @@
 
 #include "../defines/types.h"
 
-/* E */ CML_Error CML_ThawNode    (CML_Bytes * bytes, CML_Node * result);
-/* E */ CML_Error CML_ThawStorable(CML_Bytes * bytes, char    ** result);
+/* E */ CML_Error CML_ThawBytes(CML_Bytes * bytes, CML_Node ** result);
+/* E */ CML_Error CML_ThawFile (char * filename,   CML_Node ** result);
 
 #endif // THAW_H

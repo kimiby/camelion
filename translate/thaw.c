@@ -17,17 +17,76 @@
 *  You should have received a copy of the GNU Lesser General Public License
 *  along with Project «Camelion». If not, see <http://www.gnu.org/licenses/>.
 */
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "../translate/thaw.h"
+#include "../defines/tools.h"
 
-CML_Error CML_ThawNode(CML_Bytes * bytes, CML_Node * result)
+CML_Error CML_ThawBytes(CML_Bytes * bytes, CML_Node ** result)
 {
     ///@todo
     return CML_ERROR_SUCCESS;
 }
 
-CML_Error CML_ThawStorable(CML_Bytes * bytes, char ** result)
+static CML_Error CML_FromFile(char * filename, CML_Bytes ** result)
 {
-    ///@todo
+    CHECKPTR(filename);
+    CHECKPTR(result);
+
+    FILE * file = fopen(filename, "rb");
+    if (!file)
+        return CML_ERROR_USER_CANTOPENFILE;
+
+    if (!fseek(file, 0, SEEK_END))
+    {
+        fclose(file);
+        return CML_ERROR_USER_CANTSEEKFILE;
+    }
+
+    int32_t fsize = ftell(file);
+    if (fsize < 0)
+    {
+        fclose(file);
+        return CML_ERROR_USER_CANTSEEKFILE;
+    }
+
+    (*result)->size = fsize;
+
+    if (!fseek(file, 0, SEEK_SET))
+    {
+        fclose(file);
+        return CML_ERROR_USER_CANTSEEKFILE;
+    }
+
+    (*result)->data = malloc(fsize + 1);
+    if (!(*result)->data)
+    {
+        fclose(file);
+        return CML_ERROR_USER_BADALLOC;
+    }
+
+    if (fread((*result)->data, fsize, 1, file) != (uint32_t)fsize)
+    {
+        fclose(file);
+        return CML_ERROR_USER_CANTREADFILE;
+    }
+
+    fclose(file);
+
+    return CML_ERROR_SUCCESS;
+}
+
+CML_Error CML_ThawFile(char * filename, CML_Node ** result)
+{
+    CHECKPTR(filename);
+    CHECKPTR(result);
+
+    CML_Bytes * bytes;
+    CHECKERR(CML_FromFile(filename, &bytes));
+    CHECKERC(CML_ThawBytes(bytes, result),
+             free(bytes->data);
+             free(bytes));
+
     return CML_ERROR_SUCCESS;
 }
