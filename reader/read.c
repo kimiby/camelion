@@ -134,15 +134,17 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char * storable, uint32_t * 
         if (storable[*caret] == '\'') { stopper = '\''; *caret += 1; } else
         if (storable[*caret] == '\"') { stopper = '\"'; *caret += 1; }
 
-        while ((storable[*caret] != stopper) &&
-               (!escaped))
+        while ((storable[*caret] != stopper) || (escaped))
         {
             if (!escaped)
             {
                 if (storable[*caret] != '\\')
                     val[valpos] = storable[*caret];
                 else
+                {
                     escaped = CML_TRUE;
+                    valpos--;
+                }
             }
             else
             {
