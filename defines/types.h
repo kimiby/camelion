@@ -22,6 +22,7 @@
 #define TYPES_H
 
 #include <stdint.h>
+
 #include "../defines/xmacro.h"
 
 /* E */ typedef enum

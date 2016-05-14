@@ -20,6 +20,7 @@
 
 #include <limits.h>
 #include <string.h>
+
 #include "../helpers/string.h"
 
 CML_Error dec2int(char * line, int32_t * value)

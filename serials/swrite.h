@@ -22,6 +22,7 @@
 #define SWRITE_H
 
 #include <stdint.h>
+
 #include "../defines/types.h"
 
 CML_Error CML_SerialWriteUINT8 (CML_Bytes * bytes, uint8_t  value);

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+
 #include "../serials/swrite.h"
 
 #define EXPAND(BYTES, SIZE)                                           \
