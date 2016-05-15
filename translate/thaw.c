@@ -21,11 +21,35 @@
 #include <stdlib.h>
 
 #include "../translate/thaw.h"
+#include "../nodes/basis.h"
 #include "../defines/tools.h"
+#include "../serials/sread.h"
+
+static CML_Error process_element(CML_Bytes * bytes, uint32_t * bpos,
+                                 CML_Node * root, CML_Bool hasname)
+{
+    ///@todo increase bpos
+
+    return CML_ERROR_SUCCESS;
+}
 
 CML_Error CML_ThawBytes(CML_Bytes * bytes, CML_Node ** result)
 {
-    ///@todo
+    CHECKPTR(bytes);
+    CHECKPTR(result);
+
+    uint32_t count;
+    uint32_t i;
+    uint32_t bpos = 0;
+
+    CHECKERR(CML_NodeCreate(CML_TYPE_HASH, result));
+    CHECKERC(CML_SerialsReadUINT32(bytes, &bpos, &count), ///@todo increase bpos in Read
+             CML_NodeFree(*result));
+
+    for (i = 0; i < count; i++)
+        CHECKERC(process_element(bytes, &bpos, *result, CML_TRUE),
+                 CML_NodeFree(*result));
+
     return CML_ERROR_SUCCESS;
 }
 
