@@ -17,6 +17,7 @@
 *  You should have received a copy of the GNU Lesser General Public License
 *  along with Project «Camelion». If not, see <http://www.gnu.org/licenses/>.
 */
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -24,11 +25,82 @@
 #include "../nodes/basis.h"
 #include "../defines/tools.h"
 #include "../serials/sread.h"
+#include "../defines/consts.h"
+
+static CML_Error process_int8(CML_Bytes * bytes, uint32_t * bpos,
+                               CML_Node * root, CML_Bool hasname)
+{
+    ///@todo
+}
+
+static CML_Error process_int32(CML_Bytes * bytes, uint32_t * bpos,
+                                CML_Node * root, CML_Bool hasname)
+{
+    ///@todo
+}
+
+static CML_Error process_string(CML_Bytes * bytes, uint32_t * bpos,
+                                 CML_Node * root, CML_Bool hasname)
+{
+    ///@todo
+}
+
+static CML_Error process_data(CML_Bytes * bytes, uint32_t * bpos,
+                               CML_Node * root, CML_Bool hasname)
+{
+    ///@todo
+}
+
+static CML_Error process_undef(CML_Bytes * bytes, uint32_t * bpos,
+                                CML_Node * root, CML_Bool hasname)
+{
+    ///@todo
+}
+
+static CML_Error process_array(CML_Bytes * bytes, uint32_t * bpos,
+                                CML_Node * root, CML_Bool hasname)
+{
+    ///@todo
+}
+
+static CML_Error process_hash(CML_Bytes * bytes, uint32_t * bpos,
+                               CML_Node * root, CML_Bool hasname)
+{
+    ///@todo
+}
 
 static CML_Error process_element(CML_Bytes * bytes, uint32_t * bpos,
                                  CML_Node * root, CML_Bool hasname)
 {
-    ///@todo increase bpos
+    uint8_t type;
+    CHECKERR(CML_SerialsReadUINT8(bytes, bpos, &type));
+
+    switch (type)
+    {
+    case CML_PERL_INT8    :
+        return process_int8  (bytes, bpos, root, hasname);
+    case CML_PERL_INT32   :
+        return process_int32 (bytes, bpos, root, hasname);
+    case CML_PERL_STRING  :
+        return process_string(bytes, bpos, root, hasname);
+    case CML_PERL_DATALONG:
+        return process_data  (bytes, bpos, root, hasname);
+    case CML_PERL_UNDEF   :
+        return process_undef (bytes, bpos, root, hasname);
+    case CML_PERL_EXTENDED :
+        CHECKERR(CML_SerialsReadUINT8(bytes, bpos, &type));
+        switch (type)
+        {
+        case CML_PERL_ARRAY :
+            return process_array(bytes, bpos, root, hasname);
+        case CML_PERL_HASH :
+            return process_hash (bytes, bpos, root, hasname);
+        default:
+            return CML_ERROR_USER_BADTYPE;
+        }
+    default:
+        return CML_ERROR_USER_BADTYPE;
+    }
 
     return CML_ERROR_SUCCESS;
 }
