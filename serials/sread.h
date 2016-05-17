@@ -27,6 +27,7 @@
 
 CML_Error CML_SerialsReadINT8  (CML_Bytes * bytes, uint32_t * bpos,  int8_t  * result);
 CML_Error CML_SerialsReadUINT8 (CML_Bytes * bytes, uint32_t * bpos, uint8_t  * result);
+CML_Error CML_SerialsReadINT32 (CML_Bytes * bytes, uint32_t * bpos,  int32_t * result);
 CML_Error CML_SerialsReadUINT32(CML_Bytes * bytes, uint32_t * bpos, uint32_t * result);
 
 

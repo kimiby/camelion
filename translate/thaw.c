@@ -37,15 +37,38 @@ static CML_Error process_int8(CML_Bytes * bytes, uint32_t * bpos,
                                CML_Node * root, CML_Bool hasname)
 {
     int8_t value;
-
     CHECKERR(CML_SerialsReadINT8(bytes, bpos, &value));
-    ///@todo
+
+    CML_Node * child;
+    CHECKERR(CML_NodeCreate(CML_TYPE_INTEGER, &child));
+    CHECKERC(CML_NodeSetInteger(child, value),
+             CML_NodeFree(child));
+    if (named)
+        CHECKERC(process_name(bytes, bpos, child),
+                 CML_NodeFree(child));
+    CHECKERC(CML_NodeAppend(root, child),
+             CML_NodeFree(child));
+
+    return CML_ERROR_SUCCESS;
 }
 
 static CML_Error process_int32(CML_Bytes * bytes, uint32_t * bpos,
                                 CML_Node * root, CML_Bool hasname)
 {
-    ///@todo
+    int32_t value;
+    CHECKERR(CML_SerialsReadINT32(bytes, bpos, &value));
+
+    CML_Node * child;
+    CHECKERR(CML_NodeCreate(CML_TYPE_INTEGER, &child));
+    CHECKERC(CML_NodeSetInteger(child, value),
+             CML_NodeFree(child));
+    if (named)
+        CHECKERC(process_name(bytes, bpos, child),
+                 CML_NodeFree(child));
+    CHECKERC(CML_NodeAppend(root, child),
+             CML_NodeFree(child));
+
+    return CML_ERROR_SUCCESS;
 }
 
 static CML_Error process_string(CML_Bytes * bytes, uint32_t * bpos,
