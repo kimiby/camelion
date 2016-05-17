@@ -27,9 +27,18 @@
 #include "../serials/sread.h"
 #include "../defines/consts.h"
 
+static CML_Error process_name(CML_Bytes * bytes, uint32_t * bpos,
+                               CML_Node * target)
+{
+    ///@todo
+}
+
 static CML_Error process_int8(CML_Bytes * bytes, uint32_t * bpos,
                                CML_Node * root, CML_Bool hasname)
 {
+    int8_t value;
+
+    CHECKERR(CML_SerialsReadINT8(bytes, bpos, &value));
     ///@todo
 }
 
