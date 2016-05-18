@@ -27,6 +27,9 @@
 #include "../serials/sread.h"
 #include "../defines/consts.h"
 
+static CML_Error process_element(CML_Bytes * bytes, uint32_t * bpos,
+                                 CML_Node * root, CML_Bool hasname);
+
 static CML_Error process_name(CML_Bytes * bytes, uint32_t * bpos,
                                CML_Node * target)
 {
@@ -43,7 +46,7 @@ static CML_Error process_int8(CML_Bytes * bytes, uint32_t * bpos,
     CHECKERR(CML_NodeCreate(CML_TYPE_INTEGER, &child));
     CHECKERC(CML_NodeSetInteger(child, value),
              CML_NodeFree(child));
-    if (named)
+    if (hasname)
         CHECKERC(process_name(bytes, bpos, child),
                  CML_NodeFree(child));
     CHECKERC(CML_NodeAppend(root, child),
@@ -62,7 +65,7 @@ static CML_Error process_int32(CML_Bytes * bytes, uint32_t * bpos,
     CHECKERR(CML_NodeCreate(CML_TYPE_INTEGER, &child));
     CHECKERC(CML_NodeSetInteger(child, value),
              CML_NodeFree(child));
-    if (named)
+    if (hasname)
         CHECKERC(process_name(bytes, bpos, child),
                  CML_NodeFree(child));
     CHECKERC(CML_NodeAppend(root, child),
@@ -76,15 +79,15 @@ static CML_Error process_string(CML_Bytes * bytes, uint32_t * bpos,
 {
     uint8_t str_len;
     CHECKERR(CML_SerialsReadUINT8(bytes, bpos, &str_len));
-    if (str_len > 256) return CML_ERROR_USER_BADSTRING;
     char string[257];
-    CHECKERR(CML_SerialReadDATA(bytes, bpos, string, str_len));
+    CHECKERR(CML_SerialReadDATA(bytes, bpos, (uint8_t *)string, str_len));
     string[str_len] = '\0';
 
+    CML_Node * child;
     CHECKERR(CML_NodeCreate(CML_TYPE_STRING, &child));
     CHECKERC(CML_NodeSetString(child, string),
              CML_NodeFree(child));
-    if (named)
+    if (hasname)
         CHECKERC(process_name(bytes, bpos, child),
                  CML_NodeFree(child));
     CHECKERC(CML_NodeAppend(root, child),
@@ -98,15 +101,16 @@ static CML_Error process_data(CML_Bytes * bytes, uint32_t * bpos,
 {
     uint32_t str_len;
     CHECKERR(CML_SerialsReadUINT32(bytes, bpos, &str_len));
-    char * string = calloc(str_len);
+    char * string = calloc(str_len, 1);
     if (!string) return CML_ERROR_USER_BADALLOC;
-    CHECKERR(CML_SerialReadDATA(bytes, bpos, string, str_len));
+    CHECKERR(CML_SerialReadDATA(bytes, bpos, (uint8_t *)string, str_len));
 
+    CML_Node * child;
     CHECKERR(CML_NodeCreate(CML_TYPE_STRING, &child));
     CHECKERC(CML_NodeSetString(child, string),
              CML_NodeFree(child);
              free(string));
-    if (named)
+    if (hasname)
         CHECKERC(process_name(bytes, bpos, child),
                  CML_NodeFree(child);
                  free(string));
@@ -123,7 +127,7 @@ static CML_Error process_undef(CML_Bytes * bytes, uint32_t * bpos,
     CML_Node * child;
     CHECKERR(CML_NodeCreate(CML_TYPE_UNDEF, &child));
 
-    if (named)
+    if (hasname)
         CHECKERC(process_name(bytes, bpos, child),
                  CML_NodeFree(child));
     CHECKERC(CML_NodeAppend(root, child),
@@ -135,13 +139,51 @@ static CML_Error process_undef(CML_Bytes * bytes, uint32_t * bpos,
 static CML_Error process_array(CML_Bytes * bytes, uint32_t * bpos,
                                 CML_Node * root, CML_Bool hasname)
 {
-    ///@todo
+    uint32_t size;
+    CHECKERR(CML_SerialsReadUINT32(bytes, bpos, &size));
+
+    CML_Node * child;
+    CHECKERR(CML_NodeCreate(CML_TYPE_ARRAY, &child));
+
+    if (hasname)
+        CHECKERC(process_name(bytes, bpos, child),
+                 CML_NodeFree(child));
+    CHECKERC(CML_NodeAppend(root, child),
+             CML_NodeFree(child));
+
+    while (size)
+    {
+        CHECKERC(process_element(bytes, bpos, child, CML_FALSE),
+                 CML_NodeFree(child));
+        size--;
+    }
+
+    return CML_ERROR_SUCCESS;
 }
 
 static CML_Error process_hash(CML_Bytes * bytes, uint32_t * bpos,
                                CML_Node * root, CML_Bool hasname)
 {
-    ///@todo
+    uint32_t size;
+    CHECKERR(CML_SerialsReadUINT32(bytes, bpos, &size));
+
+    CML_Node * child;
+    CHECKERR(CML_NodeCreate(CML_TYPE_HASH, &child));
+
+    if (hasname)
+        CHECKERC(process_name(bytes, bpos, child),
+                 CML_NodeFree(child));
+    CHECKERC(CML_NodeAppend(root, child),
+             CML_NodeFree(child));
+
+    while (size)
+    {
+        CHECKERC(process_element(bytes, bpos, child, CML_TRUE),
+                 CML_NodeFree(child));
+        size--;
+    }
+
+    return CML_ERROR_SUCCESS;
 }
 
 static CML_Error process_element(CML_Bytes * bytes, uint32_t * bpos,
