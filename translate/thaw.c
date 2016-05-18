@@ -33,7 +33,17 @@ static CML_Error process_element(CML_Bytes * bytes, uint32_t * bpos,
 static CML_Error process_name(CML_Bytes * bytes, uint32_t * bpos,
                                CML_Node * target)
 {
-    ///@todo
+    uint32_t name_len;
+    CHECKERR(CML_SerialsReadUINT32(bytes, bpos, &name_len));
+    if (name_len > 256) return CML_ERROR_USER_BADNAME;
+
+    char name[256];
+    name[name_len] = '\0';
+    CHECKERR(CML_SerialsReadDATA(bytes, bpos, (uint8_t *)name, name_len));
+
+    CHECKERR(CML_NodeSetName(target, name));
+
+    return CML_ERROR_SUCCESS;
 }
 
 static CML_Error process_int8(CML_Bytes * bytes, uint32_t * bpos,
@@ -80,7 +90,7 @@ static CML_Error process_string(CML_Bytes * bytes, uint32_t * bpos,
     uint8_t str_len;
     CHECKERR(CML_SerialsReadUINT8(bytes, bpos, &str_len));
     char string[257];
-    CHECKERR(CML_SerialReadDATA(bytes, bpos, (uint8_t *)string, str_len));
+    CHECKERR(CML_SerialsReadDATA(bytes, bpos, (uint8_t *)string, str_len));
     string[str_len] = '\0';
 
     CML_Node * child;
@@ -103,7 +113,7 @@ static CML_Error process_data(CML_Bytes * bytes, uint32_t * bpos,
     CHECKERR(CML_SerialsReadUINT32(bytes, bpos, &str_len));
     char * string = calloc(str_len, 1);
     if (!string) return CML_ERROR_USER_BADALLOC;
-    CHECKERR(CML_SerialReadDATA(bytes, bpos, (uint8_t *)string, str_len));
+    CHECKERR(CML_SerialsReadDATA(bytes, bpos, (uint8_t *)string, str_len));
 
     CML_Node * child;
     CHECKERR(CML_NodeCreate(CML_TYPE_STRING, &child));

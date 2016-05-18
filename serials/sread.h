@@ -29,6 +29,6 @@ CML_Error CML_SerialsReadINT8  (CML_Bytes * bytes, uint32_t * bpos,  int8_t  * r
 CML_Error CML_SerialsReadUINT8 (CML_Bytes * bytes, uint32_t * bpos, uint8_t  * result);
 CML_Error CML_SerialsReadINT32 (CML_Bytes * bytes, uint32_t * bpos,  int32_t * result);
 CML_Error CML_SerialsReadUINT32(CML_Bytes * bytes, uint32_t * bpos, uint32_t * result);
-CML_Error CML_SerialReadDATA   (CML_Bytes * bytes, uint32_t * bpos, uint8_t  * result, uint32_t length);
+CML_Error CML_SerialsReadDATA   (CML_Bytes * bytes, uint32_t * bpos, uint8_t  * result, uint32_t length);
 
 #endif // SREAD_H

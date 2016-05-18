@@ -41,7 +41,7 @@ CML_Error CML_SerialsReadUINT32(CML_Bytes * bytes, uint32_t * bpos, uint32_t * r
 }
 
 
-CML_Error CML_SerialReadDATA(CML_Bytes * bytes, uint32_t * bpos, uint8_t * result, uint32_t length)
+CML_Error CML_SerialsReadDATA(CML_Bytes * bytes, uint32_t * bpos, uint8_t * result, uint32_t length)
 {
     ///@todo
 }
