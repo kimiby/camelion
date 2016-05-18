@@ -96,7 +96,25 @@ static CML_Error process_string(CML_Bytes * bytes, uint32_t * bpos,
 static CML_Error process_data(CML_Bytes * bytes, uint32_t * bpos,
                                CML_Node * root, CML_Bool hasname)
 {
-    ///@todo
+    uint32_t str_len;
+    CHECKERR(CML_SerialsReadUINT32(bytes, bpos, &str_len));
+    char * string = calloc(str_len);
+    if (!string) return CML_ERROR_USER_BADALLOC;
+    CHECKERR(CML_SerialReadDATA(bytes, bpos, string, str_len));
+
+    CHECKERR(CML_NodeCreate(CML_TYPE_STRING, &child));
+    CHECKERC(CML_NodeSetString(child, string),
+             CML_NodeFree(child);
+             free(string));
+    if (named)
+        CHECKERC(process_name(bytes, bpos, child),
+                 CML_NodeFree(child);
+                 free(string));
+    CHECKERC(CML_NodeAppend(root, child),
+             CML_NodeFree(child);
+             free(string));
+
+    return CML_ERROR_SUCCESS;
 }
 
 static CML_Error process_undef(CML_Bytes * bytes, uint32_t * bpos,
