@@ -42,6 +42,7 @@
     /* User storable parsing errors                                         */ \
     CML(USER_BADSTART       , (0x30 + 0x01), "No storable signature found   ") \
     CML(USER_BADNAME        , (0x30 + 0x02), "Bad entity name               ") \
+    CML(USER_BADDATA        , (0x30 + 0x03), "Bad nfreezed data             ") \
     /* System errors                                                        */ \
     CML(SYSTEM_CANNOTEXECUTE, (0x7E),        "Command invoked cannot execute") \
     CML(SYSTEM_NOTFOUND     , (0x7F),        "Command not found             ") \

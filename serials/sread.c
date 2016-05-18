@@ -22,26 +22,80 @@
 
 CML_Error CML_SerialsReadINT8(CML_Bytes * bytes, uint32_t * bpos, int8_t * result)
 {
-    ///@todo
+    if (*bpos + sizeof(int8_t) > bytes->size)
+        return CML_ERROR_USER_BADDATA;
+
+    *result = bytes->data[*bpos];
+    *bpos += 1;
+
+    /* Need to reverse signed char */
+    /* It's a perl thing           */
+    *result ^= 1 << 7;
+
+    return CML_ERROR_SUCCESS;
 }
 
 CML_Error CML_SerialsReadUINT8(CML_Bytes * bytes, uint32_t * bpos, uint8_t * result)
 {
-    ///@todo
+    if (*bpos + sizeof(uint8_t) > bytes->size)
+        return CML_ERROR_USER_BADDATA;
+
+    *result = bytes->data[*bpos];
+    *bpos += 1;
+
+    return CML_ERROR_SUCCESS;
 }
 
 CML_Error CML_SerialsReadINT32(CML_Bytes * bytes, uint32_t * bpos, int32_t * result)
 {
+    if (*bpos + sizeof(int32_t) > bytes->size)
+        return CML_ERROR_USER_BADDATA;
 
+    union
+    {
+        int32_t res;
+        uint8_t bytes[sizeof(int32_t)];
+    } conv;
+
+    uint32_t i;
+    for (i = 0; i < sizeof(int32_t); i++, *bpos += 1)
+        conv.bytes[3 - i] = bytes->data[*bpos];
+
+    *result = conv.res;
+
+    return CML_ERROR_SUCCESS;
 }
 
 CML_Error CML_SerialsReadUINT32(CML_Bytes * bytes, uint32_t * bpos, uint32_t * result)
 {
-    ///@todo
+    if (*bpos + sizeof(uint32_t) > bytes->size)
+        return CML_ERROR_USER_BADDATA;
+
+    union
+    {
+        uint32_t res;
+        uint8_t bytes[sizeof(uint32_t)];
+    } conv;
+
+    uint32_t i;
+    for (i = 0; i < sizeof(uint32_t); i++, *bpos += 1)
+        conv.bytes[3 - i] = bytes->data[*bpos];
+
+    *result = conv.res;
+
+    return CML_ERROR_SUCCESS;
 }
 
 
 CML_Error CML_SerialsReadDATA(CML_Bytes * bytes, uint32_t * bpos, uint8_t * result, uint32_t length)
 {
-    ///@todo
+    if (*bpos + length > bytes->size)
+        return CML_ERROR_USER_BADDATA;
+
+    uint32_t i;
+    for (i = 0; i < length; i++, *bpos += 1)
+        result[i] = bytes->data[*bpos];
+    result[i] = '\0';
+
+    return CML_ERROR_SUCCESS;
 }
