@@ -148,6 +148,36 @@ char mystring[] = {"something"};
 CML_DataToFile(mystring, strlen(mystring), "./stringy.txt");
 ```
 
+# Using as settings manager
+
+You can also use this library for settings management for c-projects. Just put your settings to perl-storable and place that file somewhere. The library will do the rest:
+```perl
+{
+  messages => {
+    info    => disabled,
+    warnings => disabled,
+    errors   => enabled
+  }
+  
+  timing => {
+    lowperiod    => 20, # Seconds
+    mediumperiod => 10, # Seconds
+    highperiod   =>  2  # Seconds
+  }
+}
+```
+```c
+// Loading
+CML_Node * settings;
+CML_StorableFromFile("./settings.perl", &settings);
+...
+
+// Using
+CML_Node * lowperiod;
+CML_NodeFindInteger(settings, "timing.lowperiod", &lowperiod);
+TimerSetPeriod(lowperiod->data.integer);
+```
+
 # Error checking
 
 CameLion functions may return number of error codes (see `CML_X_ERROR_CODES`). To provide user-readable error description one may use `CML_HelpError` function:
