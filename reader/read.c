@@ -31,6 +31,30 @@
 
 #include <errno.h>
 
+static CML_Error string_symbol(char ** string, char * result)
+{
+    if (!string) return CML_ERROR_USER_BADSTRING;
+
+    *result = **string;
+    string++;
+
+    return CML_ERROR_SUCCESS;
+}
+
+static CML_Error string_skip(char ** string)
+{
+    for (;;)
+    {
+        char symbol;
+        CHECKERR(string_symbol(string, &symbol));
+        if (!isspace(symbol)) break;
+    }
+
+    string--;
+
+    return CML_ERROR_SUCCESS;
+}
+
 static CML_Error CML_NodeParse(CML_Node * root, char * storable, uint32_t * caret);
 
 static CML_Error CML_FromFile(char * filename, char ** result)
