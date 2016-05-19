@@ -62,8 +62,8 @@ static CML_Error encode_array(CML_Node * node, CML_Bytes * result)
     CHECKERR(CML_SerialWriteUINT8 (result, CML_PERL_ARRAY));
     CHECKERR(CML_SerialWriteUINT32(result, node->ncount));
     uint32_t i;
-    for (i = 0; node->ncount; i++)
-        CHECKERR(encode_node(node, result));
+    for (i = 0; i < node->ncount; i++)
+        CHECKERR(encode_node(node->nodes[i], result));
 
     return CML_ERROR_SUCCESS;
 }
@@ -74,8 +74,8 @@ static CML_Error encode_hash(CML_Node * node, CML_Bytes * result)
     CHECKERR(CML_SerialWriteUINT8 (result, CML_PERL_HASH));
     CHECKERR(CML_SerialWriteUINT32(result, node->ncount));
     uint32_t i;
-    for (i = 0; node->ncount; i++)
-        CHECKERR(encode_node(node, result));
+    for (i = 0; i < node->ncount; i++)
+        CHECKERR(encode_node(node->nodes[i], result));
 
     return CML_ERROR_SUCCESS;
 }
@@ -143,6 +143,7 @@ CML_Error CML_NfreezeStorable(char * storable, CML_Bytes ** result)
     CHECKERR(CML_StorableFromString(storable, &temp));
     CHECKERC(CML_NfreezeNode(temp, result),
              CML_NodeFree(temp));
+    CML_NodeFree(temp);
 
     return CML_ERROR_SUCCESS;
 }

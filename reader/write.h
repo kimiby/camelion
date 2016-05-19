@@ -23,6 +23,7 @@
 
 #include "../defines/types.h"
 
+/* E */ CML_Error CML_DataToFile(uint8_t * data, uint32_t length, char * filename);
 /* E */ CML_Error CML_StorableToFile  (CML_Node * node, char *  filename);
 /* E */ CML_Error CML_StorableToString(CML_Node * node, char ** storable);
 

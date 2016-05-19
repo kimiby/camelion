@@ -27,25 +27,32 @@
 
 #define CML_PERL_PADDING (4)
 
+CML_Error CML_DataToFile(uint8_t * data, uint32_t length, char * filename)
+{
+    FILE * file = fopen(filename, "wb");
+    if (!file)
+        return CML_ERROR_USER_CANTOPENFILE;
+
+    if (fwrite(data, length, 1, file))
+    {
+        fclose(file);
+        return CML_ERROR_USER_CANTWRITFILE;
+    }
+
+    fclose(file);
+
+    return CML_ERROR_SUCCESS;
+}
+
 CML_Error CML_StorableToFile(CML_Node * node, char * filename)
 {
     char * buffer;
     CHECKERR(CML_StorableToString(node, &buffer));
+    CHECKERC(CML_DataToFile((uint8_t *)buffer,
+                            strlen(buffer),
+                            filename),
+             free(buffer));
 
-    FILE * file = fopen(filename, "wb");
-    if (!file)
-    {
-        free(buffer);
-        return CML_ERROR_USER_CANTOPENFILE;
-    }
-
-    if (fwrite(buffer, strlen(buffer), 1, file))
-    {
-        free(buffer);
-        return CML_ERROR_USER_CANTWRITFILE;
-    }
-
-    free(buffer);
     return CML_ERROR_SUCCESS;
 }
 

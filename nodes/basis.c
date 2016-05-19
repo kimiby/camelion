@@ -155,10 +155,7 @@ CML_Error CML_NodeCopy(CML_Node * node, CML_Node ** dest, CML_Bool recursive)
 CML_Error CML_NodeRemove(CML_Node * node, uint32_t index)
 {
     CHECKPTR(node);
-
-    if ((node->type != CML_TYPE_ARRAY) &&
-        (node->type != CML_TYPE_HASH))
-        return CML_ERROR_USER_BADTYPE;
+    CHECKJAR(node);
 
     if (node->ncount <= index)
         return CML_ERROR_USER_BADVALUE;
@@ -169,6 +166,8 @@ CML_Error CML_NodeRemove(CML_Node * node, uint32_t index)
     for (i = index; i < (node->ncount - 1); i++)
         node->nodes[i] = node->nodes[i + 1];
 
+    node->ncount--;
+
     return CML_ERROR_SUCCESS;
 }
 
@@ -176,10 +175,7 @@ CML_Error CML_NodeAppend(CML_Node * node, CML_Node * child)
 {
     CHECKPTR(node);
     CHECKPTR(child);
-
-    if ((node->type != CML_TYPE_ARRAY) &&
-        (node->type != CML_TYPE_HASH))
-        return CML_ERROR_USER_BADTYPE;
+    CHECKJAR(node);
 
     EXTENDNODE(node, 1);
 
@@ -193,10 +189,7 @@ CML_Error CML_NodeInsert(CML_Node * node, CML_Node * child, uint32_t pos)
 {
     CHECKPTR(node);
     CHECKPTR(child);
-
-    if ((node->type != CML_TYPE_ARRAY) ||
-        (node->type != CML_TYPE_HASH))
-        return CML_ERROR_USER_BADTYPE;
+    CHECKJAR(node);
 
     if (node->ncount < pos)
         return CML_ERROR_USER_BADVALUE;
@@ -206,6 +199,9 @@ CML_Error CML_NodeInsert(CML_Node * node, CML_Node * child, uint32_t pos)
     uint32_t i;
     for (i = node->ncount; i > pos; i--)
         node->nodes[i] = node->nodes[i - 1];
+
+    node->ncount++;
+    node->nodes[pos] = child;
 
     return CML_ERROR_SUCCESS;
 }

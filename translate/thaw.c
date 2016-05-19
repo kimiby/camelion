@@ -27,6 +27,8 @@
 #include "../serials/sread.h"
 #include "../defines/consts.h"
 
+#define CML_PERL_MAJOR_VERSION (0x05)
+
 static CML_Error process_element(CML_Bytes * bytes, uint32_t * bpos,
                                  CML_Node * root, CML_Bool hasname);
 
@@ -155,9 +157,6 @@ static CML_Error process_array(CML_Bytes * bytes, uint32_t * bpos,
     CML_Node * child;
     CHECKERR(CML_NodeCreate(CML_TYPE_ARRAY, &child));
 
-    if (hasname)
-        CHECKERC(process_name(bytes, bpos, child),
-                 CML_NodeFree(child));
     CHECKERC(CML_NodeAppend(root, child),
              CML_NodeFree(child));
 
@@ -167,6 +166,10 @@ static CML_Error process_array(CML_Bytes * bytes, uint32_t * bpos,
                  CML_NodeFree(child));
         size--;
     }
+
+    if (hasname)
+        CHECKERC(process_name(bytes, bpos, child),
+                 CML_NodeFree(child));
 
     return CML_ERROR_SUCCESS;
 }
@@ -241,8 +244,15 @@ CML_Error CML_ThawBytes(CML_Bytes * bytes, CML_Node ** result)
     uint32_t i;
     uint32_t bpos = 0;
 
+    uint8_t sign;
+    CHECKERR(CML_SerialsReadUINT8(bytes, &bpos, &sign));
+    if (sign != CML_PERL_MAJOR_VERSION)
+        return CML_ERROR_USER_BADVERSION;
+    CHECKERR(CML_SerialsReadUINT8(bytes, &bpos, &sign));
+    CHECKERR(CML_SerialsReadUINT8(bytes, &bpos, &sign));
+
     CHECKERR(CML_NodeCreate(CML_TYPE_HASH, result));
-    CHECKERC(CML_SerialsReadUINT32(bytes, &bpos, &count), ///@todo increase bpos in Read
+    CHECKERC(CML_SerialsReadUINT32(bytes, &bpos, &count),
              CML_NodeFree(*result));
 
     for (i = 0; i < count; i++)
@@ -261,7 +271,7 @@ static CML_Error CML_FromFile(char * filename, CML_Bytes ** result)
     if (!file)
         return CML_ERROR_USER_CANTOPENFILE;
 
-    if (!fseek(file, 0, SEEK_END))
+    if (fseek(file, 0, SEEK_END))
     {
         fclose(file);
         return CML_ERROR_USER_CANTSEEKFILE;
@@ -276,7 +286,7 @@ static CML_Error CML_FromFile(char * filename, CML_Bytes ** result)
 
     (*result)->size = fsize;
 
-    if (!fseek(file, 0, SEEK_SET))
+    if (fseek(file, 0, SEEK_SET))
     {
         fclose(file);
         return CML_ERROR_USER_CANTSEEKFILE;
@@ -289,7 +299,7 @@ static CML_Error CML_FromFile(char * filename, CML_Bytes ** result)
         return CML_ERROR_USER_BADALLOC;
     }
 
-    if (fread((*result)->data, fsize, 1, file) != (uint32_t)fsize)
+    if (fread((*result)->data, 1, fsize, file) != (uint32_t)fsize)
     {
         fclose(file);
         return CML_ERROR_USER_CANTREADFILE;
@@ -306,10 +316,19 @@ CML_Error CML_ThawFile(char * filename, CML_Node ** result)
     CHECKPTR(result);
 
     CML_Bytes * bytes;
-    CHECKERR(CML_FromFile(filename, &bytes));
+    bytes = calloc(sizeof(CML_Bytes), 1);
+    if (!bytes)
+        return CML_ERROR_USER_BADALLOC;
+
+    CHECKERC(CML_FromFile(filename, &bytes),
+             free(bytes->data);
+             free(bytes));
     CHECKERC(CML_ThawBytes(bytes, result),
              free(bytes->data);
              free(bytes));
+
+    free(bytes->data);
+    free(bytes);
 
     return CML_ERROR_SUCCESS;
 }
