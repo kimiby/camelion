@@ -213,6 +213,16 @@ static CML_Error CML_NodeReadName(CML_Node * root, char * storable, uint32_t * c
     return CML_ERROR_SUCCESS;
 }
 
+static CML_Error CML_NodeCheckArrow(char * storable, uint32_t * caret)
+{
+    if (storable[*caret] != '=') return CML_ERROR_USER_BADSTRING;
+    *caret += 1;
+    if (storable[*caret] != '>') return CML_ERROR_USER_BADSTRING;
+    *caret += 1;
+
+    return CML_ERROR_SUCCESS;
+}
+
 static CML_Error CML_NodeParse(CML_Node * root, char * storable, uint32_t * caret)
 {
     space_skip(storable, caret);
@@ -224,8 +234,16 @@ static CML_Error CML_NodeParse(CML_Node * root, char * storable, uint32_t * care
         CHECKERR(CML_NodeCreate(CML_TYPE_UNDEF, &child));
 
         if (root->type != CML_TYPE_ARRAY)
+        {
             CHECKERC(CML_NodeReadName(child, storable, caret),
                      CML_NodeFree(child));
+
+            space_skip(storable, caret);
+            CHECKERC(CML_NodeCheckArrow(storable, caret),
+                     CML_NodeFree(child));
+        }
+        space_skip(storable, caret);
+
         CHECKERC(CML_NodeReadValue(child, storable, caret),
                  CML_NodeFree(child));
 
@@ -252,6 +270,8 @@ CML_Error CML_StorableFromString(char * storable, CML_Node ** result)
     char * data = malloc(strlen(storable) + 1);
     if (!data)
         return CML_ERROR_USER_BADALLOC;
+
+    strcpy(data, storable);
 
     comments_remove(data);
 

@@ -49,20 +49,18 @@ CML_Error CML_StorableToFile(CML_Node * node, char * filename)
     return CML_ERROR_SUCCESS;
 }
 
+static CML_Error string_append_str(char ** string, char * str);
+
 static CML_Error string_append_pdd(char ** string, uint32_t level)
 {
-    char   * oldptr = *string;
-    uint32_t oldpos = (*string) ? strlen(*string) : 0;
-    *string = realloc(*string, strlen(*string) + level * CML_PERL_PADDING + 1);
-    if (!(*string))
-    {
-        *string = oldptr;
-        return CML_ERROR_USER_BADALLOC;
-    }
-
+    char buffer[128];
     uint32_t i;
-    for (i = 0; i < level * CML_PERL_PADDING; i++)
-        *string[oldpos + i] = ' ';
+    for (i = 0; i < CML_PERL_PADDING; i++)
+        buffer[i] = ' ';
+    buffer[i] = '\0';
+
+    for (i = 0; i < level; i++)
+        CHECKERR(string_append_str(string, buffer));
 
     return CML_ERROR_SUCCESS;
 }
@@ -87,7 +85,7 @@ static CML_Error string_append_str(char ** string, char * str)
 {
     char   * oldptr = *string;
     uint32_t oldpos = (*string) ? strlen(*string) : 0;
-    *string = realloc(*string, strlen(*string) + strlen(str) + 1);
+    *string = realloc(*string, oldpos + strlen(str) + 1);
     if (!(*string))
     {
         *string = oldptr;
@@ -95,6 +93,46 @@ static CML_Error string_append_str(char ** string, char * str)
     }
 
     sprintf(*string + oldpos, "%s", str);
+
+    return CML_ERROR_SUCCESS;
+}
+
+static CML_Error string_append_esc(char ** string, char * str)
+{
+    char * quoted_buffer;
+
+    if (str)
+    {
+        uint32_t quotedsize = 0;
+        uint32_t i, qpos;
+        for (i = 0; i < strlen(str); i++)
+            if (str[i] == '\'') quotedsize++;
+
+        quoted_buffer = malloc(strlen(str) + quotedsize + 2 + 1);
+        qpos = 0;
+        quoted_buffer[qpos++] = '\'';
+        for (i = 0; i < strlen(str); i++)
+        {
+            if (str[i] == '\'')
+                quoted_buffer[qpos++] = '\\';
+            quoted_buffer[qpos++] = str[i];
+        }
+        quoted_buffer[qpos++] = '\'';
+        quoted_buffer[qpos] = '\0';
+    }
+    else
+    {
+        quoted_buffer = malloc(2 + 1);
+        if (!quoted_buffer)
+            return CML_ERROR_USER_BADALLOC;
+
+        quoted_buffer[0] = '\'';
+        quoted_buffer[1] = '\'';
+        quoted_buffer[2] = '\0';
+    }
+
+    CHECKERC(string_append_str(string, quoted_buffer),
+             free(quoted_buffer));
 
     return CML_ERROR_SUCCESS;
 }
@@ -121,7 +159,7 @@ static CML_Error node_print(CML_Node * root, uint32_t level, char ** output)
         CHECKERR(string_append_str(output, ",\n"));
         break;
     case CML_TYPE_STRING :
-        CHECKERR(string_append_str(output, root->data.string));
+        CHECKERR(string_append_esc(output, root->data.string));
         CHECKERR(string_append_str(output, ",\n"));
         break;
     case CML_TYPE_ARRAY :
@@ -145,6 +183,7 @@ static CML_Error node_print(CML_Node * root, uint32_t level, char ** output)
     return CML_ERROR_SUCCESS;
 }
 
+///@todo escape ' values, always print with '.
 CML_Error CML_StorableToString(CML_Node * node, char ** storable)
 {
     CHECKPTR(node);

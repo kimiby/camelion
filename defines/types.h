@@ -59,7 +59,7 @@
     uint32_t  size;
 } CML_Bytes;
 
-typedef enum
+/* E */ typedef enum
 {
     CML_FALSE,
     CML_TRUE

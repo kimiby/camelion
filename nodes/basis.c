@@ -29,7 +29,7 @@ CML_Error CML_NodeCreate(CML_Type type, CML_Node ** result)
     CHECKPTR(result);
     CHECKTYP(type);
 
-    CML_Node * node = malloc(sizeof(CML_Node *));
+    CML_Node * node = malloc(sizeof(CML_Node));
     if (!node)
         return CML_ERROR_USER_BADALLOC;
 
@@ -173,7 +173,7 @@ CML_Error CML_NodeAppend(CML_Node * node, CML_Node * child)
     CHECKPTR(node);
     CHECKPTR(child);
 
-    if ((node->type != CML_TYPE_ARRAY) ||
+    if ((node->type != CML_TYPE_ARRAY) &&
         (node->type != CML_TYPE_HASH))
         return CML_ERROR_USER_BADTYPE;
 
