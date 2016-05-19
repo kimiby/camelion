@@ -29,6 +29,8 @@
 #include "../defines/tools.h"
 #include "../helpers/string.h"
 
+#include <errno.h>
+
 static CML_Error CML_NodeParse(CML_Node * root, char * storable, uint32_t * caret);
 
 static CML_Error CML_FromFile(char * filename, char ** result)
@@ -40,7 +42,7 @@ static CML_Error CML_FromFile(char * filename, char ** result)
     if (!file)
         return CML_ERROR_USER_CANTOPENFILE;
 
-    if (!fseek(file, 0, SEEK_END))
+    if (fseek(file, 0, SEEK_END))
     {
         fclose(file);
         return CML_ERROR_USER_CANTSEEKFILE;
@@ -53,20 +55,20 @@ static CML_Error CML_FromFile(char * filename, char ** result)
         return CML_ERROR_USER_CANTSEEKFILE;
     }
 
-    if (!fseek(file, 0, SEEK_SET))
+    if (fseek(file, 0, SEEK_SET))
     {
         fclose(file);
         return CML_ERROR_USER_CANTSEEKFILE;
     }
 
-    *result = malloc(fsize + 1);
+    *result = calloc(fsize + 1, 1);
     if (!(*result))
     {
         fclose(file);
         return CML_ERROR_USER_BADALLOC;
     }
 
-    if (fread(*result, fsize, 1, file) != (uint32_t)fsize)
+    if (fread(*result, 1, fsize, file) != (uint32_t)fsize)
     {
         fclose(file);
         return CML_ERROR_USER_CANTREADFILE;
@@ -284,8 +286,11 @@ CML_Error CML_StorableFromString(char * storable, CML_Node ** result)
     ///@fixme currentlyit's unsafe. Need func/macro to check borders for
     ///       every character accessing.
 
-    CHECKERR(CML_NodeCreate(CML_TYPE_HASH, result));
-    CHECKERR(CML_NodeParse (*result, data, &caret));
+    CHECKERC(CML_NodeCreate(CML_TYPE_HASH, result),
+             free(data));
+    CHECKERC(CML_NodeParse (*result, data, &caret),
+             free(data));
+    free(data);
 
     return CML_ERROR_SUCCESS;
 }
@@ -295,8 +300,11 @@ CML_Error CML_StorableFromFile(char * filename, CML_Node ** result)
     CHECKPTR(filename);
     CHECKPTR(result);
 
-    char * buffer;
+    char * buffer = NULL;
     CHECKERR(CML_FromFile(filename, &buffer));
+
+    if (!buffer)
+        return CML_ERROR_USER_BADSTRING;
 
     CHECKERC(CML_StorableFromString(buffer, result), free(buffer));
 

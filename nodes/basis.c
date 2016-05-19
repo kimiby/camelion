@@ -44,6 +44,9 @@ CML_Error CML_NodeSetName(CML_Node * node, char * value)
 {
     CHECKPTR(node);
 
+    if ((value) && (strlen(value) > 255))
+        return CML_ERROR_USER_BADNAME;
+
     if (node->name)
         free(node->name);
 
@@ -109,6 +112,7 @@ CML_Error CML_NodeFree(CML_Node * node)
          * & 3rd elements will not be freed    */
     }
 
+    free(node->nodes);
     free(node);
 
     return CML_ERROR_SUCCESS;

@@ -134,6 +134,8 @@ static CML_Error string_append_esc(char ** string, char * str)
     CHECKERC(string_append_str(string, quoted_buffer),
              free(quoted_buffer));
 
+    free(quoted_buffer);
+
     return CML_ERROR_SUCCESS;
 }
 
@@ -183,7 +185,6 @@ static CML_Error node_print(CML_Node * root, uint32_t level, char ** output)
     return CML_ERROR_SUCCESS;
 }
 
-///@todo escape ' values, always print with '.
 CML_Error CML_StorableToString(CML_Node * node, char ** storable)
 {
     CHECKPTR(node);

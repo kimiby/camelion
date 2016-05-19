@@ -25,18 +25,22 @@
 #include "../nodes/find.h"
 #include "../defines/tools.h"
 
-static char * path_curr(char * path)
+static void path_curr(char * path, char * dest)
 {
     char   * delpos = strchr(path, CML_FIND_DELIMETER);
     uint32_t intpos;
-    intpos = delpos ? strlen(path) : (uint32_t)(delpos - path);
-    return path + intpos;
+    intpos = delpos ? (uint32_t)(delpos - path) : strlen(path);
+    strcpy(dest, path);
+    dest[intpos] = '\0';
 }
 
-static char * path_next(char * path)
+static void path_next(char * path, char * dest)
 {
     char * delpos = strchr(path, CML_FIND_DELIMETER);
-    return delpos ? delpos + 1 : NULL;
+    if (delpos)
+        strcpy(dest, delpos + 1);
+    else
+        dest[0] = '\0';
 }
 
 CML_Error CML_NodeFindIndex(CML_Node * node, char * name, uint32_t * index)
@@ -63,13 +67,15 @@ CML_Error CML_NodeFind(CML_Node * node, char * path, CML_Node ** result, CML_Typ
     CHECKTYP(type  );
     CHECKPTR(result);
 
-    char * next = path_next(path);
-    char * curr = path_curr(path);
+    char next[256];
+    char curr[256];
+    path_curr(path, curr);
+    path_next(path, next);
     uint32_t index;
 
     CHECKERR(CML_NodeFindIndex(node, curr, &index));
 
-    if (next) /* go deeper */
+    if (next[0]) /* go deeper */
         CHECKERR(CML_NodeFind(node->nodes[index], next, result, type))
     else /* stay here */
     {
