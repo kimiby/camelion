@@ -114,6 +114,22 @@ static CML_Error string_arrow(char ** storable)
     return CML_ERROR_SUCCESS;
 }
 
+static CML_Error string_realloc(char ** string, uint32_t * size, char symbol)
+{
+    char * oldptr = *string;
+    *string = realloc(*string, *size + 1);
+    if (!*string)
+    {
+        free(oldptr);
+        return CML_ERROR_USER_BADALLOC;
+    }
+
+    (*string)[*size] = symbol;
+    *size += 1;
+
+    return CML_ERROR_SUCCESS;
+}
+
 static CML_Error CML_NodeParse(CML_Node * root, char ** storable);
 
 static CML_Error CML_FromFile(char * filename, char ** result)
@@ -205,8 +221,7 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
     }
     else
     {
-        ///@fixme implement stepped realloc
-        char val[0x1000];
+        char * value = NULL;
         uint32_t valpos = 0;
 
             char stopper = CML_SMB_ENV;
@@ -228,7 +243,7 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
             if (!escaped)
             {
                 if (symbol != CML_SMB_ESC)
-                    val[valpos] = symbol;
+                    CHECKERR(string_realloc(&value, &valpos, symbol))
                 else
                 {
                     escaped = CML_TRUE;
@@ -238,9 +253,8 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
             else
             {
                 escaped = CML_FALSE;
-                val[valpos] = symbol;
+                CHECKERR(string_realloc(&value, &valpos, symbol));
             }
-            valpos++;
 
             CHECKERR(string_symbol(storable, &symbol));
         }
@@ -248,36 +262,20 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
             CHECKERR(string_symbol(storable, &symbol));
 
         CHECKERR(string_symbol(storable, &symbol));
-        val[valpos++] = CML_SMB_ENS;
+        CHECKERR(string_realloc(&value, &valpos, CML_SMB_ENS));
 
-        int32_t value;
-        if (dec2int(val, &value) == CML_ERROR_SUCCESS)
+        int32_t int_value;
+        if (dec2int(value, &int_value) == CML_ERROR_SUCCESS)
         {
             root->type = CML_TYPE_INTEGER;
-            CHECKERR(CML_NodeSetInteger(root, value));
+            CHECKERR(CML_NodeSetInteger(root, int_value));
         }
         else
         {
             root->type = CML_TYPE_STRING;
-            CHECKERR(CML_NodeSetString(root, val));
+            CHECKERR(CML_NodeSetString(root, value));
         }
     }
-
-    return CML_ERROR_SUCCESS;
-}
-
-static CML_Error string_realloc(char ** string, uint32_t * size, char symbol)
-{
-    char * oldptr = *string;
-    *string = realloc(*string, *size + 1);
-    if (!*string)
-    {
-        free(oldptr);
-        return CML_ERROR_USER_BADALLOC;
-    }
-
-    (*string)[*size] = symbol;
-    *size += 1;
 
     return CML_ERROR_SUCCESS;
 }
