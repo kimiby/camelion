@@ -232,3 +232,13 @@ if (result != CML_ERROR_SUCCESS)
 Memory allocation failed
 ```
 
+# Header file generation
+
+If you want to use libcamelion.h in non-C project you may need to preprocess it to get rid of macros.
+
+```sh
+mv ./libcamelion.h ./_libcamelion.h
+gcc -E ./_libcamelion.h -o ./libcamelion.h
+indent -gnu -l200 -i4 -nut ./libcamelion.h
+```
+NOTE: using `indent` might need installation of this utility.
