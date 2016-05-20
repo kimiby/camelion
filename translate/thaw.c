@@ -157,9 +157,6 @@ static CML_Error process_array(CML_Bytes * bytes, uint32_t * bpos,
     CML_Node * child;
     CHECKERR(CML_NodeCreate(CML_TYPE_ARRAY, &child));
 
-    CHECKERC(CML_NodeAppend(root, child),
-             CML_NodeFree(child));
-
     while (size)
     {
         CHECKERC(process_element(bytes, bpos, child, CML_FALSE),
@@ -170,6 +167,8 @@ static CML_Error process_array(CML_Bytes * bytes, uint32_t * bpos,
     if (hasname)
         CHECKERC(process_name(bytes, bpos, child),
                  CML_NodeFree(child));
+    CHECKERC(CML_NodeAppend(root, child),
+             CML_NodeFree(child));
 
     return CML_ERROR_SUCCESS;
 }
@@ -183,18 +182,18 @@ static CML_Error process_hash(CML_Bytes * bytes, uint32_t * bpos,
     CML_Node * child;
     CHECKERR(CML_NodeCreate(CML_TYPE_HASH, &child));
 
-    if (hasname)
-        CHECKERC(process_name(bytes, bpos, child),
-                 CML_NodeFree(child));
-    CHECKERC(CML_NodeAppend(root, child),
-             CML_NodeFree(child));
-
     while (size)
     {
         CHECKERC(process_element(bytes, bpos, child, CML_TRUE),
                  CML_NodeFree(child));
         size--;
     }
+
+    if (hasname)
+        CHECKERC(process_name(bytes, bpos, child),
+                 CML_NodeFree(child));
+    CHECKERC(CML_NodeAppend(root, child),
+             CML_NodeFree(child));
 
     return CML_ERROR_SUCCESS;
 }
