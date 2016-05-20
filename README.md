@@ -26,7 +26,7 @@ CML_NodeCreate(CML_TYPE_STRING, &node);
 ...
 CML_NodeFree(node);
 ```
-Supported types are: 
+Supported types are:
 - `CML_TYPE_UNDEF`
 - `CML_TYPE_INTEGER`
 - `CML_TYPE_STRING`
@@ -123,21 +123,60 @@ You can load perl-storable into node via these functions:
 CML_Error CML_StorableFromFile  (char * filename, CML_Node ** result);
 CML_Error CML_StorableFromString(char * storable, CML_Node ** result);
 ```
+```c
+char teststorable[] = {
+    "{\n"
+    "   branch1 => {\n"
+    "       value1 => 1,\n"
+    "       value2 => \"Deep into\",\n"
+    "   },\n"
+    "   branch2 => [\n"
+    "       'Darkness peering',"
+    "       'Long I \\'stood\\' there',\n"
+    "       \"Wondering, fearing\","
+    "   ],\n"
+    "   branch3 => {\n"
+    "       value3 => Dreaming,\n"
+    "       value4 => Dreams,\n"
+    "       value5 => \"No mortal ever dared to dream before\",\n"
+    "   },\n"
+    "}"
+}
+
+int main (void)
+{
+  CML_Node * poe;
+  CML_StorableFromString(teststorable, &poe);
+  <..>
+```
+
+
 And unload it back with these:
 ```c
 CML_Error CML_StorableToFile  (CML_Node * node, char *  filename);
 CML_Error CML_StorableToString(CML_Node * node, char ** storable);
 ```
+```c
+  <..>
+  char * string;
+  CML_StorableToString(poe, &string);
+  printf("%s\n", string);
+  free(string);
+  CML_NodeFree(poe);
+}
+```
+
 ## Nfreezed data <-> Node translation
 ```c
 CML_Error CML_ThawBytes(CML_Bytes * bytes, CML_Node ** result);
 CML_Error CML_ThawFile (char * filename,   CML_Node ** result);
-/// Notice that CML_ThawXXX functions allocate result variable 
+/// Notice that CML_ThawXXX functions allocate result variable
 
-CML_Error CML_NfreezeNode    (CML_Node * node, CML_Bytes ** result); 
+CML_Error CML_NfreezeNode    (CML_Node * node, CML_Bytes ** result);
 CML_Error CML_NfreezeStorable(char * storable, CML_Bytes ** result);
 // Notice that CML_NfreezeXXX functions allocate result variable on their own
 ```
+
 If you want to save CML_Bytes to file you can use `CML_DataToFile` function:
 ```c
 CML_DataToFile(bytes->data, bytes->size, "./myfilename.bin");
@@ -158,7 +197,7 @@ You can also use this library for settings management for c-projects. Just put y
     warnings => disabled,
     errors   => enabled
   }
-  
+
   timing => {
     lowperiod    => 20, # Seconds
     mediumperiod => 10, # Seconds
@@ -190,6 +229,6 @@ if (result != CML_ERROR_SUCCESS)
 }
 ```
 ```
-Memory allocation failed      
+Memory allocation failed
 ```
 
