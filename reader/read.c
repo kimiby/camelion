@@ -36,7 +36,16 @@ static CML_Error string_symbol(char ** string, char * result)
     if (!string) return CML_ERROR_USER_BADSTRING;
 
     *result = **string;
-    string++;
+    *string += 1;
+
+    return CML_ERROR_SUCCESS;
+}
+
+static CML_Error string_peek(char ** string, char * result)
+{
+    if (!string) return CML_ERROR_USER_BADSTRING;
+
+    *result = **string;
 
     return CML_ERROR_SUCCESS;
 }
@@ -50,12 +59,23 @@ static CML_Error string_skip(char ** string)
         if (!isspace(symbol)) break;
     }
 
-    string--;
+    *string -= 1;
 
     return CML_ERROR_SUCCESS;
 }
 
-static CML_Error CML_NodeParse(CML_Node * root, char * storable, uint32_t * caret);
+static CML_Error string_arrow(char ** storable)
+{
+    char symbol;
+    CHECKERR(string_symbol(storable, &symbol));
+    if (symbol != '=') return CML_ERROR_USER_BADSTRING;
+    CHECKERR(string_symbol(storable, &symbol));
+    if (symbol != '>') return CML_ERROR_USER_BADSTRING;
+
+    return CML_ERROR_SUCCESS;
+}
+
+static CML_Error CML_NodeParse(CML_Node * root, char ** storable);
 
 static CML_Error CML_FromFile(char * filename, char ** result)
 {
@@ -127,26 +147,22 @@ static void comments_remove(char * string)
     }
 }
 
-static void space_skip(char * string, uint32_t * caret)
+static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
 {
-    while (isspace(string[*caret])) *caret += 1;
-}
+    CHECKERR(string_skip(storable));
 
-static CML_Error CML_NodeReadValue(CML_Node * root, char * storable, uint32_t * caret)
-{
-    space_skip(storable, caret);
+    char symbol;
+    CHECKERR(string_symbol(storable, &symbol));
 
-    if (storable[*caret] == '{')
+    if (symbol == '{')
     {
         root->type = CML_TYPE_HASH;
-        *caret += 1;
-        CHECKERR(CML_NodeParse(root, storable, caret));
+        CHECKERR(CML_NodeParse(root, storable));
     }
-    else if (storable[*caret] == '[')
+    else if (symbol == '[')
     {
         root->type = CML_TYPE_ARRAY;
-        *caret += 1;
-        CHECKERR(CML_NodeParse(root, storable, caret));
+        CHECKERR(CML_NodeParse(root, storable));
     }
     else
     {
@@ -157,15 +173,23 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char * storable, uint32_t * 
             char stopper = ',';
         CML_Bool escaped = CML_FALSE;
 
-        if (storable[*caret] == '\'') { stopper = '\''; *caret += 1; } else
-        if (storable[*caret] == '\"') { stopper = '\"'; *caret += 1; }
+        if (symbol == '\'')
+        {
+            stopper = '\'';
+            CHECKERR(string_symbol(storable, &symbol));
+        }
+        else if (symbol == '\"')
+        {
+            stopper = '\"';
+            CHECKERR(string_symbol(storable, &symbol));
+        }
 
-        while ((storable[*caret] != stopper) || (escaped))
+        while ((symbol != stopper) || (escaped))
         {
             if (!escaped)
             {
-                if (storable[*caret] != '\\')
-                    val[valpos] = storable[*caret];
+                if (symbol != '\\')
+                    val[valpos] = symbol;
                 else
                 {
                     escaped = CML_TRUE;
@@ -175,16 +199,16 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char * storable, uint32_t * 
             else
             {
                 escaped = CML_FALSE;
-                val[valpos] = storable[*caret];
+                val[valpos] = symbol;
             }
             valpos++;
 
-            *caret += 1;
+            CHECKERR(string_symbol(storable, &symbol));
         }
         if (stopper != ',')
-            *caret += 1;
+            CHECKERR(string_symbol(storable, &symbol));
 
-        *caret += 1;
+        CHECKERR(string_symbol(storable, &symbol));
         val[valpos++] = '\0';
 
         int32_t value;
@@ -203,20 +227,23 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char * storable, uint32_t * 
     return CML_ERROR_SUCCESS;
 }
 
-static CML_Error CML_NodeReadName(CML_Node * root, char * storable, uint32_t * caret)
+static CML_Error CML_NodeReadName(CML_Node * root, char ** storable)
 {
-    space_skip(storable, caret);
+    CHECKERR(string_skip(storable));
 
-    if ((storable[*caret] != '{') &&
-        (storable[*caret] != '['))
+    char symbol;
+    CHECKERR(string_symbol(storable, &symbol));
+
+    if ((symbol != '{') &&
+        (symbol != '['))
     {
         char name[0x100];
         uint32_t namecaret = 0;
 
-        while (!isspace(storable[*caret]))
+        while (!isspace(symbol))
         {
-            name[namecaret++] = storable[*caret];
-            *caret += 1;
+            name[namecaret++] = symbol;
+            CHECKERR(string_symbol(storable, &symbol));
             if (namecaret > 255)
                 return CML_ERROR_USER_BADNAME;
         }
@@ -228,62 +255,51 @@ static CML_Error CML_NodeReadName(CML_Node * root, char * storable, uint32_t * c
 
         memcpy(root->name, name, namecaret);
 
-        space_skip(storable, caret);
+        CHECKERR(string_skip(storable));
 
-        if ((strlen(storable + *caret) >    2) &&
-            (       storable [ *caret] == '=') &&
-            (       storable [ *caret] == '>'))
-            *caret += 2;
+        CHECKERR(string_arrow(storable));
     }
 
     return CML_ERROR_SUCCESS;
 }
 
-static CML_Error CML_NodeCheckArrow(char * storable, uint32_t * caret)
+static CML_Error CML_NodeParse(CML_Node * root, char ** storable)
 {
-    if (storable[*caret] != '=') return CML_ERROR_USER_BADSTRING;
-    *caret += 1;
-    if (storable[*caret] != '>') return CML_ERROR_USER_BADSTRING;
-    *caret += 1;
+    CHECKERR(string_skip(storable));
 
-    return CML_ERROR_SUCCESS;
-}
+    char symbol;
+    CHECKERR(string_peek(storable, &symbol));
 
-static CML_Error CML_NodeParse(CML_Node * root, char * storable, uint32_t * caret)
-{
-    space_skip(storable, caret);
-
-    while ((storable[*caret] != ']') &&
-           (storable[*caret] != '}'))
+    while ((symbol != ']') &&
+           (symbol != '}'))
     {
         CML_Node * child;
         CHECKERR(CML_NodeCreate(CML_TYPE_UNDEF, &child));
 
         if (root->type != CML_TYPE_ARRAY)
         {
-            CHECKERC(CML_NodeReadName(child, storable, caret),
-                     CML_NodeFree(child));
-
-            space_skip(storable, caret);
-            CHECKERC(CML_NodeCheckArrow(storable, caret),
+            CHECKERC(CML_NodeReadName(child, storable),
                      CML_NodeFree(child));
         }
-        space_skip(storable, caret);
+        CHECKERR(string_skip(storable));
 
-        CHECKERC(CML_NodeReadValue(child, storable, caret),
+        CHECKERC(CML_NodeReadValue(child, storable),
                  CML_NodeFree(child));
 
         CHECKERR(CML_NodeAppend(root, child));
 
-        space_skip(storable, caret);
+        CHECKERR(string_skip(storable));
+        CHECKERR(string_peek(storable, &symbol));
     }
 
     /* Skip '}' or ']' */
-    *caret += 1;
+    CHECKERR(string_symbol(storable, &symbol));
 
-    space_skip(storable, caret);
-    if (storable[*caret] == ',')
-        *caret += 1;
+    CHECKERR(string_skip(storable));
+
+    /* Skip last ',' */
+    if ((**storable) && (**storable == ','))
+        *storable += 1;
 
     return CML_ERROR_SUCCESS;
 }
@@ -297,24 +313,24 @@ CML_Error CML_StorableFromString(char * storable, CML_Node ** result)
     if (!data)
         return CML_ERROR_USER_BADALLOC;
 
+    char * olddata = data;
     strcpy(data, storable);
 
     comments_remove(data);
 
-    uint32_t caret = 0;
-    space_skip(data, &caret);
+    CHECKERR(string_skip(&data));
 
-    if (data[caret++] != '{')
+    char symbol;
+    CHECKERR(string_symbol(&data, &symbol));
+
+    if (symbol != '{')
         return CML_ERROR_USER_BADSTART;
 
-    ///@fixme currentlyit's unsafe. Need func/macro to check borders for
-    ///       every character accessing.
-
     CHECKERC(CML_NodeCreate(CML_TYPE_HASH, result),
-             free(data));
-    CHECKERC(CML_NodeParse (*result, data, &caret),
-             free(data));
-    free(data);
+             free(olddata));
+    CHECKERC(CML_NodeParse (*result, &data),
+             free(olddata));
+    free(olddata);
 
     return CML_ERROR_SUCCESS;
 }
