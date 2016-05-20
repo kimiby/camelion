@@ -31,6 +31,45 @@
 
 #include <errno.h>
 
+enum CML_Symbols
+{
+    CML_SMB_CBO =  '{', // Curly Bracket Opened
+    CML_SMB_CBC =  '}', // Curly Bracket Closed
+    CML_SMB_SBO =  '[', // Square Bracket Opened
+    CML_SMB_SBC =  ']', // Square Bracket Closed
+    CML_SMB_CMM =  ',', // Comma
+    CML_SMB_EQU =  '=', // Quality
+    CML_SMB_GRT =  '>', // Greater Than Sign
+    CML_SMB_HSH =  '#', // Hash (Pound) Sign
+    CML_SMB_SPC =  ' ', // Space Sign
+    CML_SMB_NUL = '\0', // Null
+    CML_SMB_BSL = '\\', // Backslash
+    CML_SMB_DQU = '\"', // Double Quotes
+    CML_SMB_SQU = '\'', // Single Quotes
+    CML_SMB_NLN = '\n', // New Line
+
+    CML_SMB_AR1 = CML_SMB_EQU, // Perl Arrow Part 1
+    CML_SMB_AR2 = CML_SMB_GRT, // Perl Arrow Part 2
+
+    CML_SMB_CM1 = CML_SMB_HSH, // Perl Comment Started
+    CML_SMB_CM2 = CML_SMB_NLN, // Perl Comment Ended
+    CML_SMB_CM3 = CML_SMB_SPC, // Perl Comment Filler
+
+    CML_SMB_HS1 = CML_SMB_CBO, // Perl Hash Opened
+    CML_SMB_HS2 = CML_SMB_CBC, // Perl Hash Closed
+
+    CML_SMB_RR1 = CML_SMB_SBO, // Perl Array Opened
+    CML_SMB_RR2 = CML_SMB_SBC, // Perl Array Closed
+
+    CML_SMB_QT1 = CML_SMB_DQU, // Perl Quotes Type 1
+    CML_SMB_QT2 = CML_SMB_SQU, // Perl Quotes Type 2
+
+    CML_SMB_ENS = CML_SMB_NUL, // Perl End-Of-String
+    CML_SMB_ENV = CML_SMB_CMM, // Perl End-Of-Value
+
+    CML_SMB_ESC = CML_SMB_BSL  // Perl Escape Symbol
+};
+
 static CML_Error string_symbol(char ** string, char * result)
 {
     if (!string) return CML_ERROR_USER_BADSTRING;
@@ -68,9 +107,9 @@ static CML_Error string_arrow(char ** storable)
 {
     char symbol;
     CHECKERR(string_symbol(storable, &symbol));
-    if (symbol != '=') return CML_ERROR_USER_BADSTRING;
+    if (symbol != CML_SMB_AR1) return CML_ERROR_USER_BADSTRING;
     CHECKERR(string_symbol(storable, &symbol));
-    if (symbol != '>') return CML_ERROR_USER_BADSTRING;
+    if (symbol != CML_SMB_AR2) return CML_ERROR_USER_BADSTRING;
 
     return CML_ERROR_SUCCESS;
 }
@@ -131,16 +170,16 @@ static void comments_remove(char * string)
     {
         if (flag)
         {
-            if (string[i] == '\n')
+            if (string[i] == CML_SMB_CM2)
                 flag = CML_FALSE;
             else
-                string[i] = ' ';
+                string[i] = CML_SMB_CM3;
         }
         else
         {
-            if (string[i] == '#')
+            if (string[i] == CML_SMB_CM1)
             {
-                string[i] = ' ';
+                string[i] = CML_SMB_CM3;
                 flag = CML_TRUE;
             }
         }
@@ -154,12 +193,12 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
     char symbol;
     CHECKERR(string_symbol(storable, &symbol));
 
-    if (symbol == '{')
+    if (symbol == CML_SMB_HS1)
     {
         root->type = CML_TYPE_HASH;
         CHECKERR(CML_NodeParse(root, storable));
     }
-    else if (symbol == '[')
+    else if (symbol == CML_SMB_RR1)
     {
         root->type = CML_TYPE_ARRAY;
         CHECKERR(CML_NodeParse(root, storable));
@@ -170,17 +209,17 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
         char val[0x1000];
         uint32_t valpos = 0;
 
-            char stopper = ',';
+            char stopper = CML_SMB_ENV;
         CML_Bool escaped = CML_FALSE;
 
-        if (symbol == '\'')
+        if (symbol == CML_SMB_QT2)
         {
-            stopper = '\'';
+            stopper = CML_SMB_QT2;
             CHECKERR(string_symbol(storable, &symbol));
         }
-        else if (symbol == '\"')
+        else if (symbol == CML_SMB_QT1)
         {
-            stopper = '\"';
+            stopper = CML_SMB_QT1;
             CHECKERR(string_symbol(storable, &symbol));
         }
 
@@ -188,7 +227,7 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
         {
             if (!escaped)
             {
-                if (symbol != '\\')
+                if (symbol != CML_SMB_ESC)
                     val[valpos] = symbol;
                 else
                 {
@@ -205,11 +244,11 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
 
             CHECKERR(string_symbol(storable, &symbol));
         }
-        if (stopper != ',')
+        if (stopper != CML_SMB_ENV)
             CHECKERR(string_symbol(storable, &symbol));
 
         CHECKERR(string_symbol(storable, &symbol));
-        val[valpos++] = '\0';
+        val[valpos++] = CML_SMB_ENS;
 
         int32_t value;
         if (dec2int(val, &value) == CML_ERROR_SUCCESS)
@@ -227,6 +266,22 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
     return CML_ERROR_SUCCESS;
 }
 
+static CML_Error string_realloc(char ** string, uint32_t * size, char symbol)
+{
+    char * oldptr = *string;
+    *string = realloc(*string, *size + 1);
+    if (!*string)
+    {
+        free(oldptr);
+        return CML_ERROR_USER_BADALLOC;
+    }
+
+    (*string)[*size] = symbol;
+    *size += 1;
+
+    return CML_ERROR_SUCCESS;
+}
+
 static CML_Error CML_NodeReadName(CML_Node * root, char ** storable)
 {
     CHECKERR(string_skip(storable));
@@ -234,29 +289,24 @@ static CML_Error CML_NodeReadName(CML_Node * root, char ** storable)
     char symbol;
     CHECKERR(string_symbol(storable, &symbol));
 
-    if ((symbol != '{') &&
-        (symbol != '['))
+    if ((symbol != CML_SMB_HS1) &&
+        (symbol != CML_SMB_RR1))
     {
-        char name[0x100];
         uint32_t namecaret = 0;
+        root->name = NULL;
 
         while (!isspace(symbol))
         {
-            name[namecaret++] = symbol;
+            CHECKERR(string_realloc(&root->name, &namecaret, symbol));
             CHECKERR(string_symbol(storable, &symbol));
             if (namecaret > 255)
+            {
+                free(root->name);
                 return CML_ERROR_USER_BADNAME;
+            }
         }
-        name[namecaret++] = '\0';
-
-        root->name = malloc(namecaret);
-        if (!root->name)
-            return CML_ERROR_USER_BADALLOC;
-
-        memcpy(root->name, name, namecaret);
-
+        CHECKERR(string_realloc(&root->name, &namecaret, CML_SMB_ENS));
         CHECKERR(string_skip(storable));
-
         CHECKERR(string_arrow(storable));
     }
 
@@ -270,8 +320,8 @@ static CML_Error CML_NodeParse(CML_Node * root, char ** storable)
     char symbol;
     CHECKERR(string_peek(storable, &symbol));
 
-    while ((symbol != ']') &&
-           (symbol != '}'))
+    while ((symbol != CML_SMB_RR2) &&
+           (symbol != CML_SMB_HS2))
     {
         CML_Node * child;
         CHECKERR(CML_NodeCreate(CML_TYPE_UNDEF, &child));
@@ -298,7 +348,7 @@ static CML_Error CML_NodeParse(CML_Node * root, char ** storable)
     CHECKERR(string_skip(storable));
 
     /* Skip last ',' */
-    if ((**storable) && (**storable == ','))
+    if ((**storable) && (**storable == CML_SMB_ENV))
         *storable += 1;
 
     return CML_ERROR_SUCCESS;
@@ -323,7 +373,7 @@ CML_Error CML_StorableFromString(char * storable, CML_Node ** result)
     char symbol;
     CHECKERR(string_symbol(&data, &symbol));
 
-    if (symbol != '{')
+    if (symbol != CML_SMB_HS1)
         return CML_ERROR_USER_BADSTART;
 
     CHECKERC(CML_NodeCreate(CML_TYPE_HASH, result),
