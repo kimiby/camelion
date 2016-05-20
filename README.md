@@ -237,6 +237,7 @@ Memory allocation failed
 If you want to use libcamelion.h in non-C project you may need to preprocess it to get rid of macros.
 
 ```sh
+./scripts/generate_h.sh
 mv ./libcamelion.h ./_libcamelion.h
 gcc -E ./_libcamelion.h -o ./libcamelion.h
 indent -gnu -l200 -i4 -nut ./libcamelion.h

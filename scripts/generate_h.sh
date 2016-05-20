@@ -45,7 +45,7 @@ HDEFNAME="LIBCAMELION_H"
 
 # Say
 echo "# Started generate_h.sh"
-cd ../../camelion
+#cd ../../camelion
 
 # Remove old file
 rm $TARGET
