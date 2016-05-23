@@ -240,6 +240,15 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
 
         while ((symbol != stopper) || (escaped))
         {
+            //if ((stopper == CML_SMB_ENV) &&
+            //    ((symbol == CML_SMB_RR2) || (symbol == CML_SMB_HS2)))
+            //{
+            //
+            //    break;
+            //}
+            if ((stopper == CML_SMB_ENV) && (isspace(symbol)))
+                break;
+
             if (!escaped)
             {
                 if (symbol != CML_SMB_ESC)
@@ -261,7 +270,7 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
         if (stopper != CML_SMB_ENV)
             CHECKERR(string_symbol(storable, &symbol));
 
-        CHECKERR(string_symbol(storable, &symbol));
+        //CHECKERR(string_symbol(storable, &symbol));
         CHECKERR(string_realloc(&value, &valpos, CML_SMB_ENS));
 
         int32_t int_value;
