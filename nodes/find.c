@@ -113,3 +113,31 @@ CML_Error CML_NodeFindInteger(CML_Node * node, char * path, CML_Node ** result)
 {
     return CML_NodeFind(node, path, result, CML_TYPE_INTEGER);
 }
+
+CML_Error CML_NodeFindContainer(CML_Node * node, char * path, CML_Node ** result)
+{
+    CHECKPTR(node  );
+    CHECKPTR(result);
+
+    char next[256];
+    char curr[256];
+    path_curr(path, curr);
+    path_next(path, next);
+    uint32_t index;
+
+    CHECKERR(CML_NodeFindIndex(node, curr, &index));
+
+    if (next[0]) /* go deeper */
+        CHECKERR(CML_NodeFindContainer(node->nodes[index], next, result))
+    else /* stay here */
+    {
+        if ((node->nodes[index]->type == CML_TYPE_ARRAY) ||
+            (node->nodes[index]->type == CML_TYPE_HASH))
+            *result = node->nodes[index];
+        else
+            return CML_ERROR_USER_BADTYPE;
+    }
+
+
+    return CML_ERROR_SUCCESS;
+}
