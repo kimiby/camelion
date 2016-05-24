@@ -268,6 +268,8 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
             CHECKERR(string_symbol(storable, &symbol));
         }
         if (stopper != CML_SMB_ENV)
+            CHECKERR(string_peek(storable, &symbol));
+        if (symbol == CML_SMB_ENV)
             CHECKERR(string_symbol(storable, &symbol));
 
         //CHECKERR(string_symbol(storable, &symbol));

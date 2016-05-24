@@ -23,7 +23,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 DESTDIR = ../../[bin]
-QMAKE_POST_LINK  = ../../camelion/scripts/generate_h.sh
+#QMAKE_POST_LINK  = ../../camelion/scripts/generate_h.sh
 
 # @todo if release strip -s <bin>
 
