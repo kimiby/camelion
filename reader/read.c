@@ -240,14 +240,17 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
 
         while ((symbol != stopper) || (escaped))
         {
-            //if ((stopper == CML_SMB_ENV) &&
-            //    ((symbol == CML_SMB_RR2) || (symbol == CML_SMB_HS2)))
-            //{
-            //
-            //    break;
-            //}
-            if ((stopper == CML_SMB_ENV) && (isspace(symbol)))
+            if ((stopper == CML_SMB_ENV) &&
+                 isspace(symbol))
                 break;
+
+            if ((stopper == CML_SMB_ENV) &&
+                ((symbol == CML_SMB_AR2) ||
+                 (symbol == CML_SMB_HS2)))
+            {
+                *storable -= 1;
+                break;
+            }
 
             if (!escaped)
             {
@@ -313,7 +316,7 @@ static CML_Error CML_NodeReadName(CML_Node * root, char ** storable)
         uint32_t namecaret = 0;
         root->name = NULL;
 
-        while (!isspace(symbol))
+        while ((!isspace(symbol)) && (symbol != CML_SMB_AR1))
         {
             CHECKERR(string_realloc(&root->name, &namecaret, symbol));
             CHECKERR(string_symbol(storable, &symbol));
@@ -323,6 +326,9 @@ static CML_Error CML_NodeReadName(CML_Node * root, char ** storable)
                 return CML_ERROR_USER_BADNAME;
             }
         }
+        if (symbol == CML_SMB_AR1)
+            *storable -= 1;
+
         CHECKERR(string_realloc(&root->name, &namecaret, CML_SMB_ENS));
         CHECKERR(string_skip(storable));
         CHECKERR(string_arrow(storable));
@@ -341,6 +347,9 @@ static CML_Error CML_NodeParse(CML_Node * root, char ** storable)
     while ((symbol != CML_SMB_RR2) &&
            (symbol != CML_SMB_HS2))
     {
+        if (symbol == CML_SMB_NUL)
+            return CML_ERROR_USER_BADSTRING;
+
         CML_Node * child;
         CHECKERR(CML_NodeCreate(CML_TYPE_UNDEF, &child));
 
@@ -391,11 +400,19 @@ CML_Error CML_StorableFromString(char * storable, CML_Node ** result)
     char symbol;
     CHECKERR(string_symbol(&data, &symbol));
 
-    if (symbol != CML_SMB_HS1)
-        return CML_ERROR_USER_BADSTART;
+    CML_Type roottype;
 
-    CHECKERC(CML_NodeCreate(CML_TYPE_HASH, result),
+    switch (symbol)
+    {
+    case CML_SMB_HS1: roottype = CML_TYPE_HASH;  break;
+    case CML_SMB_RR1: roottype = CML_TYPE_ARRAY; break;
+    default:
+        return CML_ERROR_USER_BADSTART;
+    }
+
+    CHECKERC(CML_NodeCreate(roottype, result),
              free(olddata));
+
     CHECKERC(CML_NodeParse (*result, &data),
              free(olddata));
     free(olddata);
