@@ -20,4 +20,6 @@
 
 #include <stdint.h>
 
-uint8_t signature[3] = {0x05, 0x09, 0x03};
+const uint8_t signature[3] = {0x05, 0x09};
+const uint8_t sign_hash    =  0x03;
+const uint8_t sign_arry    =  0x02;

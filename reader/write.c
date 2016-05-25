@@ -27,13 +27,22 @@
 
 #define CML_PERL_PADDING (4)
 
+CML_Error CML_DataFree(CML_Bytes ** bytes)
+{
+    free((*bytes)->data);
+    free(*bytes);
+    *bytes = NULL;
+
+    return CML_ERROR_SUCCESS;
+}
+
 CML_Error CML_DataToFile(uint8_t * data, uint32_t length, char * filename)
 {
     FILE * file = fopen(filename, "wb");
     if (!file)
         return CML_ERROR_USER_CANTOPENFILE;
 
-    if (fwrite(data, length, 1, file))
+    if (!fwrite(data, 1, length, file))
     {
         fclose(file);
         return CML_ERROR_USER_CANTWRITFILE;

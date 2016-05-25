@@ -113,7 +113,7 @@ static CML_Error process_data(CML_Bytes * bytes, uint32_t * bpos,
 {
     uint32_t str_len;
     CHECKERR(CML_SerialsReadUINT32(bytes, bpos, &str_len));
-    char * string = calloc(str_len, 1);
+    char * string = calloc(str_len + 1, 1);
     if (!string) return CML_ERROR_USER_BADALLOC;
     CHECKERR(CML_SerialsReadDATA(bytes, bpos, (uint8_t *)string, str_len));
 
@@ -122,13 +122,14 @@ static CML_Error process_data(CML_Bytes * bytes, uint32_t * bpos,
     CHECKERC(CML_NodeSetString(child, string),
              CML_NodeFree(child);
              free(string));
+
+    free(string);
+
     if (hasname)
         CHECKERC(process_name(bytes, bpos, child),
-                 CML_NodeFree(child);
-                 free(string));
+                 CML_NodeFree(child));
     CHECKERC(CML_NodeAppend(root, child),
-             CML_NodeFree(child);
-             free(string));
+             CML_NodeFree(child));
 
     return CML_ERROR_SUCCESS;
 }
@@ -247,15 +248,33 @@ CML_Error CML_ThawBytes(CML_Bytes * bytes, CML_Node ** result)
     CHECKERR(CML_SerialsReadUINT8(bytes, &bpos, &sign));
     if (sign != CML_PERL_MAJOR_VERSION)
         return CML_ERROR_USER_BADVERSION;
+    /* Ignoring minor version */
     CHECKERR(CML_SerialsReadUINT8(bytes, &bpos, &sign));
+    /* Reading main type */
     CHECKERR(CML_SerialsReadUINT8(bytes, &bpos, &sign));
 
-    CHECKERR(CML_NodeCreate(CML_TYPE_HASH, result));
+    CML_Bool named;
+    CML_Type typed;
+
+    if (sign == sign_hash)
+    {
+        typed = CML_TYPE_HASH;
+        named = CML_TRUE;
+    }
+    else if (sign == sign_arry)
+    {
+        typed = CML_TYPE_ARRAY;
+        named = CML_FALSE;
+    }
+    else
+        return CML_ERROR_USER_BADTYPE;
+
+    CHECKERR(CML_NodeCreate(typed, result));
     CHECKERC(CML_SerialsReadUINT32(bytes, &bpos, &count),
              CML_NodeFree(*result));
 
     for (i = 0; i < count; i++)
-        CHECKERC(process_element(bytes, &bpos, *result, CML_TRUE),
+        CHECKERC(process_element(bytes, &bpos, *result, named),
                  CML_NodeFree(*result));
 
     return CML_ERROR_SUCCESS;

@@ -298,6 +298,8 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
                 CHECKERR(CML_NodeSetString(root, value));
             }
         }
+
+        free(value);
     }
 
     return CML_ERROR_SUCCESS;

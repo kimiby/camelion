@@ -32,6 +32,8 @@
 #define CML_PERL_INT32    (0x09)
 #define CML_PERL_STRING   (0x0A)
 
-extern const uint8_t signature[3];
+extern const uint8_t signature[2];
+extern const uint8_t sign_hash;
+extern const uint8_t sign_arry;
 
 #endif // CONSTS_H

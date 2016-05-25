@@ -124,6 +124,14 @@ CML_Error CML_NfreezeNode(CML_Node * node, CML_Bytes ** result)
         CHECKERC(CML_SerialWriteUINT8(*result, signature[i]),
                  free(*result));
 
+    if (node->type == CML_TYPE_HASH)
+        CHECKERC(CML_SerialWriteUINT8(*result, sign_hash),
+                 free(*result));
+
+    if (node->type == CML_TYPE_ARRAY)
+        CHECKERC(CML_SerialWriteUINT8(*result, sign_arry),
+                 free(*result));
+
     CHECKERC(CML_SerialWriteUINT32(*result, node->ncount),
              free(*result));
 
