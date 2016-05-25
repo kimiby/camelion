@@ -10,6 +10,24 @@ CameLion can:
   field2 => value2
 }
 ```
+```
+[
+    aaa,
+    bbb,
+    ccc,
+    {
+        ddd => eee,
+        fff => {
+            ggg => hhh
+        }
+    },
+    [
+        iii,
+        jjj, kkk,
+             lll
+    ]
+]
+```
 - Provide access to any node, allowing to modificate it, remove or append any other node.
 - Read and write perl-nfreezed binary data (nfreeze/thaw C-analogue)
 
