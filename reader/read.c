@@ -268,23 +268,32 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
             CHECKERR(string_symbol(storable, &symbol));
         }
         if (stopper != CML_SMB_ENV)
+        {
             CHECKERR(string_peek(storable, &symbol));
-        if (symbol == CML_SMB_ENV)
-            CHECKERR(string_symbol(storable, &symbol));
+            if (symbol == CML_SMB_ENV)
+                CHECKERR(string_symbol(storable, &symbol));
+        }
 
-        //CHECKERR(string_symbol(storable, &symbol));
         CHECKERR(string_realloc(&value, &valpos, CML_SMB_ENS));
 
-        int32_t int_value;
-        if (dec2int(value, &int_value) == CML_ERROR_SUCCESS)
-        {
-            root->type = CML_TYPE_INTEGER;
-            CHECKERR(CML_NodeSetInteger(root, int_value));
-        }
-        else
+        if (stopper != CML_SMB_ENV)
         {
             root->type = CML_TYPE_STRING;
             CHECKERR(CML_NodeSetString(root, value));
+        }
+        else
+        {
+            int32_t int_value;
+            if (dec2int(value, &int_value) == CML_ERROR_SUCCESS)
+            {
+                root->type = CML_TYPE_INTEGER;
+                CHECKERR(CML_NodeSetInteger(root, int_value));
+            }
+            else
+            {
+                root->type = CML_TYPE_STRING;
+                CHECKERR(CML_NodeSetString(root, value));
+            }
         }
     }
 
