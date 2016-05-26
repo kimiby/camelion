@@ -352,10 +352,10 @@ CML_Error CML_ThawFile(char * filename, CML_Node ** result)
 }
 
 
-CML_Error CML_ThatData(char * data, uint32_t size, CML_Node ** result)
+CML_Error CML_ThawData(char * data, uint32_t size, CML_Node ** result)
 {
     CML_Bytes bytes;
-    bytes.data = data;
+    bytes.data = (uint8_t *)data;
     bytes.size = size;
 
     CHECKERR(CML_ThawBytes(&bytes, result));
