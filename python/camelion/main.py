@@ -55,7 +55,7 @@ def __thaw(c, o=None):
 
 def __make_type(d):
     return {
-        0: None,
+        0: lambda: None,
         1: lambda: d.data.integer,
         2: lambda: d.data.string,
         3: lambda: [],
@@ -63,12 +63,19 @@ def __make_type(d):
     }[d.type]()
 
 
-def thaw(data, a):
-    err = camelion.CML_ThawData(data, len(data), byref(a))
+def thaw(data):
+    node = POINTER(CMLNode)()
+
+    err = camelion.CML_ThawData(data, len(data), byref(node))
     if err > 0:
+        # todo: err 2 string
         raise Exception("Bad data :", err)
 
-    return __thaw(a)
+    res = __thaw(node)
+
+    camelion.CML_NodeFree(node)
+
+    return res
 
 
 def freeze():
