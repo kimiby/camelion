@@ -132,7 +132,7 @@ static CML_Error string_realloc(char ** string, uint32_t * size, char symbol)
 
 static CML_Error CML_NodeParse(CML_Node * root, char ** storable);
 
-static CML_Error CML_FromFile(char * filename, char ** result)
+CML_Error CML_FromFile(char * filename, char ** result)
 {
     CHECKPTR(filename);
     CHECKPTR(result);

@@ -23,6 +23,8 @@
 
 #define UNUSED(X) (void)(X)
 
+/* Extended library tools                  */
+/* E+ */
 #define CHECKPTR(X)                         \
     if (!X) return CML_ERROR_USER_BADPOINTER
 #define CHECKSTR(X)                         \
@@ -50,6 +52,10 @@
         return _res;                        \
     }                                       \
 }
+#define CHECKMEM(X)                         \
+    if (!X) return CML_ERROR_USER_BADALLOC
+/* E- */
+
 #define EXTENDNODE(NODE, SIZE)              \
 {                                           \
     CML_Node ** oldptr = (NODE)->nodes;     \
@@ -63,7 +69,5 @@
         return CML_ERROR_USER_BADALLOC;     \
     }                                       \
 }
-#define CHECKMEM(X)                         \
-    if (!X) return CML_ERROR_USER_BADALLOC
 
 #endif // TOOLS_H
