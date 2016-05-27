@@ -186,8 +186,10 @@ CML_Error CML_StorableToString(CML_Node * node, char ** storable);
 
 ## Nfreezed data <-> Node translation
 ```c
-CML_Error CML_ThawBytes(CML_Bytes * bytes, CML_Node ** result);
-CML_Error CML_ThawFile (char * filename,   CML_Node ** result);
+CML_Error CML_ThawBytes(CML_Bytes * bytes,          CML_Node ** result);
+CML_Error CML_ThawFile (char * filename,            CML_Node ** result);
+CML_Error CML_ThawData (char * data, uint32_t size, CML_Node ** result);
+
 /// Notice that CML_ThawXXX functions allocate result variable
 
 CML_Error CML_NfreezeNode    (CML_Node * node, CML_Bytes ** result);
