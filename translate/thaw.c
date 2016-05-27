@@ -212,8 +212,10 @@ static CML_Error process_element(CML_Bytes * bytes, uint32_t * bpos,
     case CML_PERL_INT32   :
         return process_int32 (bytes, bpos, root, hasname);
     case CML_PERL_STRING  :
+    case CML_PERL_UTF8    :
         return process_string(bytes, bpos, root, hasname);
     case CML_PERL_DATALONG:
+    case CML_PERL_LUTF8   :
         return process_data  (bytes, bpos, root, hasname);
     case CML_PERL_UNDEF   :
         return process_undef (bytes, bpos, root, hasname);
