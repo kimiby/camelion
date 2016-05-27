@@ -25,6 +25,6 @@
 
 #include "../defines/types.h"
 
-CML_Error dec2int(char * line, int32_t * value);
+/* E */ CML_Error dec2int(char * line, int32_t * value);
 
 #endif // STRING_H
