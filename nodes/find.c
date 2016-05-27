@@ -52,7 +52,8 @@ CML_Error CML_NodeFindIndex(CML_Node * node, char * name, uint32_t * index)
 
     uint32_t i;
     for (i = 0; i < node->ncount; i++)
-    if (!strcmp(node->nodes[i]->name, name))
+    if    ((node->nodes[i]->name) &&
+           (!strcmp(node->nodes[i]->name, name)))
     {
         *index = i;
         return CML_ERROR_SUCCESS;
