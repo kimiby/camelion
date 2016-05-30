@@ -264,8 +264,19 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
             }
             else
             {
+                char xchecker;
                 escaped = CML_FALSE;
-                CHECKERR(string_realloc(&value, &valpos, symbol));
+                CHECKERR(string_peek(storable, &xchecker));
+                if (xchecker == 'x')
+                {
+                    char lpart, rpart;
+                    CHECKERR(string_symbol(storable, &lpart));
+                    CHECKERR(string_symbol(storable, &rpart));
+                    lpart = (lpart << 8) + rpart;
+                    CHECKERR(string_realloc(&value, &valpos, lpart));
+                }
+                else
+                    CHECKERR(string_realloc(&value, &valpos, symbol));
             }
 
             CHECKERR(string_symbol(storable, &symbol));

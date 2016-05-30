@@ -113,6 +113,12 @@ static CML_Error string_append_str(char ** string, char * str)
     return CML_ERROR_SUCCESS;
 }
 
+static char string_convrt_hex(uint8_t value)
+{
+    if (value < 0xA) return '0' + value;
+                else return 'A' + (value - 0xA);
+}
+
 static CML_Error string_append_esc(char ** string, char * str)
 {
     char * quoted_buffer;
@@ -122,7 +128,10 @@ static CML_Error string_append_esc(char ** string, char * str)
         uint32_t quotedsize = 0;
         uint32_t i, qpos;
         for (i = 0; i < strlen(str); i++)
+        {
             if (str[i] == '\'') quotedsize++;
+            if (str[i] <  ' ' ) quotedsize += strlen("\\xNN");
+        }
 
         quoted_buffer = malloc(strlen(str) + quotedsize + 2 + 1);
         qpos = 0;
@@ -130,8 +139,19 @@ static CML_Error string_append_esc(char ** string, char * str)
         for (i = 0; i < strlen(str); i++)
         {
             if (str[i] == '\'')
+            {
                 quoted_buffer[qpos++] = '\\';
-            quoted_buffer[qpos++] = str[i];
+                quoted_buffer[qpos++] = str[i];
+            }
+            else if (str[i] < ' ')
+            {
+                quoted_buffer[qpos++] = '\\';
+                quoted_buffer[qpos++] = 'x';
+                quoted_buffer[qpos++] = string_convrt_hex(str[i] / 0x10);
+                quoted_buffer[qpos++] = string_convrt_hex(str[i] % 0x10);
+            }
+            else
+                quoted_buffer[qpos++] = str[i];
         }
         quoted_buffer[qpos++] = '\'';
         quoted_buffer[qpos] = '\0';
@@ -163,7 +183,7 @@ static CML_Error node_print(CML_Node * root, uint32_t level, char ** output)
 
     if (root->name)
     {
-        CHECKERR(string_append_str(output, root->name));
+        CHECKERR(string_append_esc(output, root->name));
         CHECKERR(string_append_str(output, " => "));
     }
 
