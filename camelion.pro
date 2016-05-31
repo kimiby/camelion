@@ -38,7 +38,8 @@ SOURCES += \
     helpers/string.c \
     serials/swrite.c \
     serials/sread.c \
-    defines/consts.c
+    defines/consts.c \
+    memory/alloc.c
 
 HEADERS += \
     defines/types.h \
@@ -55,7 +56,8 @@ HEADERS += \
     helpers/string.h \
     defines/consts.h \
     serials/swrite.h \
-    serials/sread.h
+    serials/sread.h \
+    memory/alloc.h
 
 OTHER_FILES += \
     scripts/generate_h.sh \

@@ -26,6 +26,7 @@
 #include "../defines/tools.h"
 #include "../serials/sread.h"
 #include "../defines/consts.h"
+#include "../memory/alloc.h"
 
 #define CML_PERL_MAJOR_VERSION (0x05)
 
@@ -112,9 +113,9 @@ static CML_Error process_data(CML_Bytes * bytes, uint32_t * bpos,
                                CML_Node * root, CML_Bool hasname)
 {
     uint32_t str_len;
+    char * string;
     CHECKERR(CML_SerialsReadUINT32(bytes, bpos, &str_len));
-    char * string = calloc(str_len + 1, 1);
-    if (!string) return CML_ERROR_USER_BADALLOC;
+    CHECKERR(CML_Calloc((void **)&string, str_len + 1));
     CHECKERR(CML_SerialsReadDATA(bytes, bpos, (uint8_t *)string, str_len));
 
     CML_Node * child;
@@ -312,12 +313,8 @@ static CML_Error CML_FromFile(char * filename, CML_Bytes ** result)
         return CML_ERROR_USER_CANTSEEKFILE;
     }
 
-    (*result)->data = malloc(fsize + 1);
-    if (!(*result)->data)
-    {
-        fclose(file);
-        return CML_ERROR_USER_BADALLOC;
-    }
+    CHECKERC(CML_Malloc((void **)&(*result)->data, fsize + 1),
+             fclose(file));
 
     if (fread((*result)->data, 1, fsize, file) != (uint32_t)fsize)
     {
@@ -336,9 +333,7 @@ CML_Error CML_ThawFile(char * filename, CML_Node ** result)
     CHECKPTR(result);
 
     CML_Bytes * bytes;
-    bytes = calloc(sizeof(CML_Bytes), 1);
-    if (!bytes)
-        return CML_ERROR_USER_BADALLOC;
+    CHECKERR(CML_Calloc((void **)&bytes, sizeof(CML_Bytes)));
 
     CHECKERC(CML_FromFile(filename, &bytes),
              free(bytes->data);

@@ -23,15 +23,15 @@
 
 #include "../nodes/basis.h"
 #include "../defines/tools.h"
+#include "../memory/alloc.h"
 
 CML_Error CML_NodeCreate(CML_Type type, CML_Node ** result)
 {
     CHECKPTR(result);
     CHECKTYP(type);
 
-    CML_Node * node = malloc(sizeof(CML_Node));
-    if (!node)
-        return CML_ERROR_USER_BADALLOC;
+    CML_Node * node;
+    CHECKERR(CML_Malloc((void **)&node, sizeof(CML_Node)));
 
     memset(node, 0, sizeof(CML_Node));
     node->type         = type;
@@ -52,8 +52,7 @@ CML_Error CML_NodeSetName(CML_Node * node, char * value)
 
     if (value)
     {
-        node->name = malloc(strlen(value) + 1);        
-        CHECKMEM(node->name);
+        CHECKERR(CML_Malloc((void **)&node->name, strlen(value) + 1));
         strcpy(node->name, value);
     }
 
@@ -72,8 +71,7 @@ CML_Error CML_NodeSetString(CML_Node * node, char * value)
 
     if (value)
     {
-        node->data.string = malloc(strlen(value) + 1);
-        CHECKMEM(node->data.string);
+        CHECKERR(CML_Malloc((void **)&node->data.string, strlen(value) + 1));
         strcpy(node->data.string, value);
     }
 
@@ -177,7 +175,7 @@ CML_Error CML_NodeAppend(CML_Node * node, CML_Node * child)
     CHECKPTR(child);
     CHECKJAR(node);
 
-    EXTENDNODE(node, 1);
+    CHECKERR(CML_Realloc((void **)&node->nodes, (node->ncount + 1) * sizeof(CML_Node *)));
 
     node->nodes[node->ncount++] = child;
 
@@ -194,7 +192,7 @@ CML_Error CML_NodeInsert(CML_Node * node, CML_Node * child, uint32_t pos)
     if (node->ncount < pos)
         return CML_ERROR_USER_BADVALUE;
 
-    EXTENDNODE(node, 1);
+    CHECKERR(CML_Realloc((void **)&node->nodes, (node->ncount + 1) * sizeof(CML_Node *)));
 
     uint32_t i;
     for (i = node->ncount; i > pos; i--)

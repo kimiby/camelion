@@ -28,6 +28,7 @@
 #include "../nodes/basis.h"
 #include "../defines/tools.h"
 #include "../helpers/string.h"
+#include "../memory/alloc.h"
 
 #include <errno.h>
 
@@ -116,13 +117,7 @@ static CML_Error string_arrow(char ** storable)
 
 static CML_Error string_realloc(char ** string, uint32_t * size, char symbol)
 {
-    char * oldptr = *string;
-    *string = realloc(*string, *size + 1);
-    if (!*string)
-    {
-        free(oldptr);
-        return CML_ERROR_USER_BADALLOC;
-    }
+    CHECKERR(CML_Realloc((void **)string, *size + 1));
 
     (*string)[*size] = symbol;
     *size += 1;
@@ -160,12 +155,8 @@ CML_Error CML_FromFile(char * filename, char ** result)
         return CML_ERROR_USER_CANTSEEKFILE;
     }
 
-    *result = calloc(fsize + 1, 1);
-    if (!(*result))
-    {
-        fclose(file);
-        return CML_ERROR_USER_BADALLOC;
-    }
+    CHECKERC(CML_Calloc((void **)result, fsize + 1),
+             fclose(file));
 
     if (fread(*result, 1, fsize, file) != (uint32_t)fsize)
     {
@@ -399,9 +390,8 @@ CML_Error CML_StorableFromString(char * storable, CML_Node ** result)
     CHECKPTR(storable);
     CHECKPTR(result);
 
-    char * data = malloc(strlen(storable) + 1);
-    if (!data)
-        return CML_ERROR_USER_BADALLOC;
+    char * data;
+    CHECKERR(CML_Malloc((void **)&data, strlen(storable) + 1));
 
     char * olddata = data;
     strcpy(data, storable);

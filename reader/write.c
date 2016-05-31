@@ -24,6 +24,7 @@
 
 #include "../reader/write.h"
 #include "../defines/tools.h"
+#include "../memory/alloc.h"
 
 #define CML_PERL_PADDING (4)
 
@@ -83,14 +84,8 @@ static CML_Error string_append_pdd(char ** string, uint32_t level)
 
 static CML_Error string_append_int(char ** string, uint32_t val)
 {
-    char   * oldptr = *string;
     uint32_t oldpos = (*string) ? strlen(*string) : 0;
-    *string = realloc(*string, strlen(*string) + strlen("-4294967296") + 1);
-    if (!(*string))
-    {
-        *string = oldptr;
-        return CML_ERROR_USER_BADALLOC;
-    }
+    CHECKERR(CML_Realloc((void **)string, oldpos + strlen("-4294967296") + 1));
 
     sprintf(*string + oldpos, "%d", val);
 
@@ -99,14 +94,8 @@ static CML_Error string_append_int(char ** string, uint32_t val)
 
 static CML_Error string_append_str(char ** string, char * str)
 {
-    char   * oldptr = *string;
     uint32_t oldpos = (*string) ? strlen(*string) : 0;
-    *string = realloc(*string, oldpos + strlen(str) + 1);
-    if (!(*string))
-    {
-        *string = oldptr;
-        return CML_ERROR_USER_BADALLOC;
-    }
+    CHECKERR(CML_Realloc((void **)string, oldpos + strlen(str) + 1));
 
     sprintf(*string + oldpos, "%s", str);
 
@@ -133,7 +122,7 @@ static CML_Error string_append_esc(char ** string, char * str)
             if (str[i] <  ' ' ) quotedsize += strlen("\\xNN");
         }
 
-        quoted_buffer = malloc(strlen(str) + quotedsize + 2 + 1);
+        CHECKERR(CML_Malloc((void **)&quoted_buffer, strlen(str) + quotedsize + 2 + 1));
         qpos = 0;
         quoted_buffer[qpos++] = '\'';
         for (i = 0; i < strlen(str); i++)
@@ -147,8 +136,8 @@ static CML_Error string_append_esc(char ** string, char * str)
             {
                 quoted_buffer[qpos++] = '\\';
                 quoted_buffer[qpos++] = 'x';
-                quoted_buffer[qpos++] = string_convrt_hex(str[i] / 0x10);
-                quoted_buffer[qpos++] = string_convrt_hex(str[i] % 0x10);
+                quoted_buffer[qpos++] = string_convrt_hex(((uint8_t)(str[i]) >> 4) & 0xF);
+                quoted_buffer[qpos++] = string_convrt_hex( (uint8_t)(str[i])       & 0xF);
             }
             else
                 quoted_buffer[qpos++] = str[i];
@@ -158,13 +147,8 @@ static CML_Error string_append_esc(char ** string, char * str)
     }
     else
     {
-        quoted_buffer = malloc(2 + 1);
-        if (!quoted_buffer)
-            return CML_ERROR_USER_BADALLOC;
-
-        quoted_buffer[0] = '\'';
-        quoted_buffer[1] = '\'';
-        quoted_buffer[2] = '\0';
+        CHECKERR(CML_Malloc((void **)&quoted_buffer, 2 + 1));
+        strcpy(quoted_buffer, "''");
     }
 
     CHECKERC(string_append_str(string, quoted_buffer),

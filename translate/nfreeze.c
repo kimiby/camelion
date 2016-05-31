@@ -27,6 +27,7 @@
 #include "../nodes/basis.h"
 #include "../defines/consts.h"
 #include "../serials/swrite.h"
+#include "../memory/alloc.h"
 
 static CML_Error encode_node(CML_Node * node, CML_Bytes * result);
 
@@ -114,10 +115,7 @@ CML_Error CML_NfreezeNode(CML_Node * node, CML_Bytes ** result)
     CHECKPTR(node);
     CHECKPTR(result);
 
-    *result = malloc(sizeof(CML_Bytes));
-    CHECKMEM(*result);
-    (*result)->data = NULL;
-    (*result)->size = 0;
+    CHECKERR(CML_Calloc((void **)result, sizeof(CML_Bytes)));
 
     uint32_t i;
     for (i = 0; i < sizeof(signature); i++)
