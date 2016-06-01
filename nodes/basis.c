@@ -48,7 +48,7 @@ CML_Error CML_NodeSetName(CML_Node * node, char * value)
         return CML_ERROR_USER_BADNAME;
 
     if (node->name)
-        free(node->name);
+        CHECKERR(CML_Free((void **)&node->name));
 
     if (value)
     {
@@ -67,7 +67,7 @@ CML_Error CML_NodeSetString(CML_Node * node, char * value)
         return CML_ERROR_USER_BADTYPE;
 
     if (node->data.string)
-        free(node->data.string);
+        CHECKERR(CML_Free((void **)&node->data.string));
 
     if (value)
     {
@@ -90,28 +90,28 @@ CML_Error CML_NodeSetInteger(CML_Node * node, int32_t value)
     return CML_ERROR_SUCCESS;
 }
 
-CML_Error CML_NodeFree(CML_Node * node)
+CML_Error CML_NodeFree(CML_Node ** node)
 {
     CHECKPTR(node);
 
-    if (node->name)
-        free(node->name);
-    if ((node->type == CML_TYPE_STRING) &&
-        (node->data.string))
-        free(node->data.string);
+    if ((*node)->name)
+        CHECKERR(CML_Free((void **)&(*node)->name));
+    if (((*node)->type == CML_TYPE_STRING) &&
+        ((*node)->data.string))
+        CHECKERR(CML_Free((void **)&(*node)->data.string));
 
-    if (node->ncount)
+    if ((*node)->ncount)
     {
         uint32_t i;
-        for (i = 0; i < node->ncount; i++)
-            CHECKERR(CML_NodeFree(node->nodes[i]));
+        for (i = 0; i < (*node)->ncount; i++)
+            CHECKERR(CML_NodeFree(&(*node)->nodes[i]));
         /* There might be memory loss if 1st of 3
          * elements will return non-success. 2nd
          * & 3rd elements will not be freed    */
     }
 
-    free(node->nodes);
-    free(node);
+    CHECKERR(CML_Free((void **)&(*node)->nodes));
+    CHECKERR(CML_Free((void **)&(*node)));
 
     return CML_ERROR_SUCCESS;
 }
@@ -158,7 +158,7 @@ CML_Error CML_NodeRemove(CML_Node * node, uint32_t index)
     if (node->ncount <= index)
         return CML_ERROR_USER_BADVALUE;
 
-    CHECKERR(CML_NodeFree(node->nodes[index]));
+    CHECKERR(CML_NodeFree(&node->nodes[index]));
 
     uint32_t i;
     for (i = index; i < (node->ncount - 1); i++)

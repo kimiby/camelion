@@ -180,7 +180,7 @@ CML_Error CML_StorableToString(CML_Node * node, char ** storable);
   CML_StorableToString(poe, &string);
   printf("%s\n", string);
   free(string);
-  CML_NodeFree(poe);
+  CML_NodeFree(&poe);
 }
 ```
 

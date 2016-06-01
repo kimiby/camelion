@@ -30,9 +30,8 @@
 
 CML_Error CML_DataFree(CML_Bytes ** bytes)
 {
-    free((*bytes)->data);
-    free(*bytes);
-    *bytes = NULL;
+    CHECKERR(CML_Free((void **)&(*bytes)->data));
+    CHECKERR(CML_Free((void **)   bytes));
 
     return CML_ERROR_SUCCESS;
 }
@@ -61,7 +60,7 @@ CML_Error CML_StorableToFile(CML_Node * node, char * filename)
     CHECKERC(CML_DataToFile((uint8_t *)buffer,
                             strlen(buffer),
                             filename),
-             free(buffer));
+             CML_Free((void **)&buffer));
 
     return CML_ERROR_SUCCESS;
 }
@@ -152,9 +151,8 @@ static CML_Error string_append_esc(char ** string, char * str)
     }
 
     CHECKERC(string_append_str(string, quoted_buffer),
-             free(quoted_buffer));
-
-    free(quoted_buffer);
+             CML_Free((void **)&quoted_buffer));
+    CHECKERR(CML_Free((void **)&quoted_buffer));
 
     return CML_ERROR_SUCCESS;
 }
@@ -212,7 +210,7 @@ CML_Error CML_StorableToString(CML_Node * node, char ** storable)
 
     *storable = NULL;
     CHECKERC(node_print(node, 0, storable),
-             free(*storable); *storable = NULL);
+             CML_Free((void **)  storable));
 
     return CML_ERROR_SUCCESS;
 }

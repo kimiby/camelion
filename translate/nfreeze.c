@@ -120,22 +120,22 @@ CML_Error CML_NfreezeNode(CML_Node * node, CML_Bytes ** result)
     uint32_t i;
     for (i = 0; i < sizeof(signature); i++)
         CHECKERC(CML_SerialWriteUINT8(*result, signature[i]),
-                 free(*result));
+                 CML_Free((void **)result));
 
     if (node->type == CML_TYPE_HASH)
         CHECKERC(CML_SerialWriteUINT8(*result, sign_hash),
-                 free(*result));
+                 CML_Free((void **)result));
 
     if (node->type == CML_TYPE_ARRAY)
         CHECKERC(CML_SerialWriteUINT8(*result, sign_arry),
-                 free(*result));
+                 CML_Free((void **)result));
 
     CHECKERC(CML_SerialWriteUINT32(*result, node->ncount),
-             free(*result));
+            CML_Free((void **)result));
 
     for (i = 0; i < node->ncount; i++)
         CHECKERC(encode_node(node->nodes[i], *result),
-                 free(*result));
+                 CML_Free((void **)result));
 
     return CML_ERROR_SUCCESS;
 }
@@ -148,8 +148,8 @@ CML_Error CML_NfreezeStorable(char * storable, CML_Bytes ** result)
     CML_Node * temp;
     CHECKERR(CML_StorableFromString(storable, &temp));
     CHECKERC(CML_NfreezeNode(temp, result),
-             CML_NodeFree(temp));
-    CML_NodeFree(temp);
+             CML_NodeFree(&temp));
+    CML_NodeFree(&temp);
 
     return CML_ERROR_SUCCESS;
 }

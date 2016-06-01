@@ -301,7 +301,7 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
             }
         }
 
-        free(value);
+        CHECKERR(CML_Free((void **)&value));
     }
 
     return CML_ERROR_SUCCESS;
@@ -326,7 +326,7 @@ static CML_Error CML_NodeReadName(CML_Node * root, char ** storable)
             CHECKERR(string_symbol(storable, &symbol));
             if (namecaret > 255)
             {
-                free(root->name);
+                CHECKERR(CML_Free((void **)&root->name));
                 return CML_ERROR_USER_BADNAME;
             }
         }
@@ -360,12 +360,12 @@ static CML_Error CML_NodeParse(CML_Node * root, char ** storable)
         if (root->type != CML_TYPE_ARRAY)
         {
             CHECKERC(CML_NodeReadName(child, storable),
-                     CML_NodeFree(child));
+                     CML_NodeFree(&child));
         }
         CHECKERR(string_skip(storable));
 
         CHECKERC(CML_NodeReadValue(child, storable),
-                 CML_NodeFree(child));
+                 CML_NodeFree(&child));
 
         CHECKERR(CML_NodeAppend(root, child));
 
@@ -414,11 +414,11 @@ CML_Error CML_StorableFromString(char * storable, CML_Node ** result)
     }
 
     CHECKERC(CML_NodeCreate(roottype, result),
-             free(olddata));
+             CML_Free((void **)&olddata));
 
     CHECKERC(CML_NodeParse (*result, &data),
-             free(olddata));
-    free(olddata);
+             CML_Free((void **)&olddata));
+    CHECKERR(CML_Free((void **)&olddata));
 
     return CML_ERROR_SUCCESS;
 }
@@ -434,8 +434,9 @@ CML_Error CML_StorableFromFile(char * filename, CML_Node ** result)
     if (!buffer)
         return CML_ERROR_USER_BADSTRING;
 
-    CHECKERC(CML_StorableFromString(buffer, result), free(buffer));
+    CHECKERC(CML_StorableFromString(buffer, result),
+             CML_Free((void **)&buffer));
+    CHECKERR(CML_Free((void **)&buffer));
 
-    free(buffer);
     return CML_ERROR_SUCCESS;
 }

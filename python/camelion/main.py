@@ -84,7 +84,7 @@ def thaw(data):
 
     res = __thaw(node)
 
-    camelion.CML_NodeFree(node)
+    camelion.CML_NodeFree(byref(node))
 
     return res
 
@@ -111,6 +111,6 @@ def nfreeze(data):
         res += format(b.contents.data[n], '02x')
 
     camelion.CML_DataFree(byref(b))
-    camelion.CML_NodeFree(node)
+    camelion.CML_NodeFree(byref(node))
 
     return res
