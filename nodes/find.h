@@ -23,7 +23,9 @@
 
 #include "../defines/types.h"
 
+/* E+ */
 #define CML_FIND_DELIMETER ('.')
+/* E- */
 
 /* E */ CML_Error CML_NodeFind         (CML_Node * node, char * path, CML_Node ** result, CML_Type type);
 /* E */ CML_Error CML_NodeFindUndef    (CML_Node * node, char * path, CML_Node ** result);

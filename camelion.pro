@@ -63,5 +63,7 @@ OTHER_FILES += \
     scripts/generate_h.sh \
     COPYING \
     COPYING.LESSER \
-    README.md
+    README.md \
+    python/camelion/__init__.py \
+    python/camelion/main.py
 

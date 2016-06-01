@@ -27,6 +27,12 @@
 
 static void path_curr(char * path, char * dest)
 {
+    if (!path)
+    {
+        dest[0] = '\0';
+        return;
+    }
+
     char   * delpos = strchr(path, CML_FIND_DELIMETER);
     uint32_t intpos;
     intpos = delpos ? (uint32_t)(delpos - path) : strlen(path);
@@ -36,6 +42,12 @@ static void path_curr(char * path, char * dest)
 
 static void path_next(char * path, char * dest)
 {
+    if (!path)
+    {
+        dest[0] = '\0';
+        return;
+    }
+
     char * delpos = strchr(path, CML_FIND_DELIMETER);
     if (delpos)
         strcpy(dest, delpos + 1);
@@ -68,8 +80,8 @@ CML_Error CML_NodeFind(CML_Node * node, char * path, CML_Node ** result, CML_Typ
     CHECKTYP(type  );
     CHECKPTR(result);
 
-    char next[256];
-    char curr[256];
+    char next[1024];
+    char curr[1024];
     path_curr(path, curr);
     path_next(path, next);
     uint32_t index;
