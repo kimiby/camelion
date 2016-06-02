@@ -25,9 +25,16 @@
 
 #include "../defines/types.h"
 
-/* E */ CML_Error CML_Malloc (void ** ptr, uint32_t size);
-/* E */ CML_Error CML_Calloc (void ** ptr, uint32_t size);
-/* E */ CML_Error CML_Realloc(void ** ptr, uint32_t size);
-/* E */ CML_Error CML_Free   (void ** ptr);
+/* E+ */
+#define CML_Malloc( PTR, SIZE) CML_Malloc ((void **)PTR, SIZE)
+#define CML_Calloc( PTR, SIZE) CML_Calloc ((void **)PTR, SIZE)
+#define CML_Realloc(PTR, SIZE) CML_Realloc((void **)PTR, SIZE)
+#define CML_Free(   PTR      ) CML_Free   ((void **)PTR)
+/* E- */
+
+/* E */ CML_Error (CML_Malloc) (void ** ptr, uint32_t size);
+/* E */ CML_Error (CML_Calloc) (void ** ptr, uint32_t size);
+/* E */ CML_Error (CML_Realloc)(void ** ptr, uint32_t size);
+/* E */ CML_Error (CML_Free)   (void ** ptr);
 
 #endif // ALLOC_H

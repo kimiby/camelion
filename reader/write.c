@@ -30,8 +30,8 @@
 
 CML_Error CML_DataFree(CML_Bytes ** bytes)
 {
-    CHECKERR(CML_Free((void **)&(*bytes)->data));
-    CHECKERR(CML_Free((void **)   bytes));
+    CHECKERR(CML_Free(&(*bytes)->data));
+    CHECKERR(CML_Free(   bytes));
 
     return CML_ERROR_SUCCESS;
 }
@@ -60,7 +60,7 @@ CML_Error CML_StorableToFile(CML_Node * node, char * filename)
     CHECKERC(CML_DataToFile((uint8_t *)buffer,
                             strlen(buffer),
                             filename),
-             CML_Free((void **)&buffer));
+             CML_Free(&buffer));
 
     return CML_ERROR_SUCCESS;
 }
@@ -84,7 +84,7 @@ static CML_Error string_append_pdd(char ** string, uint32_t level)
 static CML_Error string_append_int(char ** string, uint32_t val)
 {
     uint32_t oldpos = (*string) ? strlen(*string) : 0;
-    CHECKERR(CML_Realloc((void **)string, oldpos + strlen("-4294967296") + 1));
+    CHECKERR(CML_Realloc(string, oldpos + strlen("-4294967296") + 1));
 
     sprintf(*string + oldpos, "%d", val);
 
@@ -94,7 +94,7 @@ static CML_Error string_append_int(char ** string, uint32_t val)
 static CML_Error string_append_str(char ** string, char * str)
 {
     uint32_t oldpos = (*string) ? strlen(*string) : 0;
-    CHECKERR(CML_Realloc((void **)string, oldpos + strlen(str) + 1));
+    CHECKERR(CML_Realloc(string, oldpos + strlen(str) + 1));
 
     sprintf(*string + oldpos, "%s", str);
 
@@ -121,7 +121,7 @@ static CML_Error string_append_esc(char ** string, char * str)
             if (str[i] <  ' ' ) quotedsize += strlen("\\xNN");
         }
 
-        CHECKERR(CML_Malloc((void **)&quoted_buffer, strlen(str) + quotedsize + 2 + 1));
+        CHECKERR(CML_Malloc(&quoted_buffer, strlen(str) + quotedsize + 2 + 1));
         qpos = 0;
         quoted_buffer[qpos++] = '\'';
         for (i = 0; i < strlen(str); i++)
@@ -146,13 +146,13 @@ static CML_Error string_append_esc(char ** string, char * str)
     }
     else
     {
-        CHECKERR(CML_Malloc((void **)&quoted_buffer, 2 + 1));
+        CHECKERR(CML_Malloc(&quoted_buffer, 2 + 1));
         strcpy(quoted_buffer, "''");
     }
 
     CHECKERC(string_append_str(string, quoted_buffer),
-             CML_Free((void **)&quoted_buffer));
-    CHECKERR(CML_Free((void **)&quoted_buffer));
+             CML_Free(&quoted_buffer));
+    CHECKERR(CML_Free(&quoted_buffer));
 
     return CML_ERROR_SUCCESS;
 }
@@ -210,7 +210,7 @@ CML_Error CML_StorableToString(CML_Node * node, char ** storable)
 
     *storable = NULL;
     CHECKERC(node_print(node, 0, storable),
-             CML_Free((void **)  storable));
+             CML_Free(  storable));
 
     return CML_ERROR_SUCCESS;
 }

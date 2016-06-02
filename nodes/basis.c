@@ -31,7 +31,7 @@ CML_Error CML_NodeCreate(CML_Type type, CML_Node ** result)
     CHECKTYP(type);
 
     CML_Node * node;
-    CHECKERR(CML_Malloc((void **)&node, sizeof(CML_Node)));
+    CHECKERR(CML_Malloc(&node, sizeof(CML_Node)));
 
     memset(node, 0, sizeof(CML_Node));
     node->type         = type;
@@ -48,11 +48,11 @@ CML_Error CML_NodeSetName(CML_Node * node, char * value)
         return CML_ERROR_USER_BADNAME;
 
     if (node->name)
-        CHECKERR(CML_Free((void **)&node->name));
+        CHECKERR(CML_Free(&node->name));
 
     if (value)
     {
-        CHECKERR(CML_Malloc((void **)&node->name, strlen(value) + 1));
+        CHECKERR(CML_Malloc(&node->name, strlen(value) + 1));
         strcpy(node->name, value);
     }
 
@@ -67,11 +67,11 @@ CML_Error CML_NodeSetString(CML_Node * node, char * value)
         return CML_ERROR_USER_BADTYPE;
 
     if (node->data.string)
-        CHECKERR(CML_Free((void **)&node->data.string));
+        CHECKERR(CML_Free(&node->data.string));
 
     if (value)
     {
-        CHECKERR(CML_Malloc((void **)&node->data.string, strlen(value) + 1));
+        CHECKERR(CML_Malloc(&node->data.string, strlen(value) + 1));
         strcpy(node->data.string, value);
     }
 
@@ -95,10 +95,10 @@ CML_Error CML_NodeFree(CML_Node ** node)
     CHECKPTR(node);
 
     if ((*node)->name)
-        CHECKERR(CML_Free((void **)&(*node)->name));
+        CHECKERR(CML_Free(&(*node)->name));
     if (((*node)->type == CML_TYPE_STRING) &&
         ((*node)->data.string))
-        CHECKERR(CML_Free((void **)&(*node)->data.string));
+        CHECKERR(CML_Free(&(*node)->data.string));
 
     if ((*node)->ncount)
     {
@@ -110,8 +110,8 @@ CML_Error CML_NodeFree(CML_Node ** node)
          * & 3rd elements will not be freed    */
     }
 
-    CHECKERR(CML_Free((void **)&(*node)->nodes));
-    CHECKERR(CML_Free((void **)&(*node)));
+    CHECKERR(CML_Free(&(*node)->nodes));
+    CHECKERR(CML_Free(&(*node)));
 
     return CML_ERROR_SUCCESS;
 }
@@ -175,7 +175,7 @@ CML_Error CML_NodeAppend(CML_Node * node, CML_Node * child)
     CHECKPTR(child);
     CHECKJAR(node);
 
-    CHECKERR(CML_Realloc((void **)&node->nodes, (node->ncount + 1) * sizeof(CML_Node *)));
+    CHECKERR(CML_Realloc(&node->nodes, (node->ncount + 1) * sizeof(CML_Node *)));
 
     node->nodes[node->ncount++] = child;
 
@@ -192,7 +192,7 @@ CML_Error CML_NodeInsert(CML_Node * node, CML_Node * child, uint32_t pos)
     if (node->ncount < pos)
         return CML_ERROR_USER_BADVALUE;
 
-    CHECKERR(CML_Realloc((void **)&node->nodes, (node->ncount + 1) * sizeof(CML_Node *)));
+    CHECKERR(CML_Realloc(&node->nodes, (node->ncount + 1) * sizeof(CML_Node *)));
 
     uint32_t i;
     for (i = node->ncount; i > pos; i--)

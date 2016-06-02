@@ -116,15 +116,15 @@ static CML_Error process_data(CML_Bytes * bytes, uint32_t * bpos,
     uint32_t str_len;
     char * string;
     CHECKERR(CML_SerialsReadUINT32(bytes, bpos, &str_len));
-    CHECKERR(CML_Calloc((void **)&string, str_len + 1));
+    CHECKERR(CML_Calloc(&string, str_len + 1));
     CHECKERR(CML_SerialsReadDATA(bytes, bpos, (uint8_t *)string, str_len));
 
     CML_Node * child;
     CHECKERR(CML_NodeCreate(CML_TYPE_STRING, &child));
     CHECKERC(CML_NodeSetString(child, string),
              CML_NodeFree(&child);
-             CML_Free((void **)&string));
-    CHECKERR(CML_Free((void **)&string));
+             CML_Free(&string));
+    CHECKERR(CML_Free(&string));
 
     if (hasname)
         CHECKERC(process_name(bytes, bpos, child),
@@ -313,7 +313,7 @@ static CML_Error CML_FromFile(char * filename, CML_Bytes ** result)
         return CML_ERROR_USER_CANTSEEKFILE;
     }
 
-    CHECKERC(CML_Malloc((void **)&(*result)->data, fsize + 1),
+    CHECKERC(CML_Malloc(&(*result)->data, fsize + 1),
              fclose(file));
 
     if (fread((*result)->data, 1, fsize, file) != (uint32_t)fsize)
@@ -333,7 +333,7 @@ CML_Error CML_ThawFile(char * filename, CML_Node ** result)
     CHECKPTR(result);
 
     CML_Bytes * bytes;
-    CHECKERR(CML_Calloc((void **)&bytes, sizeof(CML_Bytes)));
+    CHECKERR(CML_Calloc(&bytes, sizeof(CML_Bytes)));
 
     CHECKERC(CML_FromFile(filename, &bytes),
              CML_DataFree(&bytes));

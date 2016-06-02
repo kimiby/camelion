@@ -23,7 +23,7 @@
 #include "../memory/alloc.h"
 #include "../defines/tools.h"
 
-CML_Error CML_Malloc(void ** ptr, uint32_t size)
+CML_Error (CML_Malloc)(void ** ptr, uint32_t size)
 {
     CHECKPTR(ptr);
 
@@ -35,7 +35,7 @@ CML_Error CML_Malloc(void ** ptr, uint32_t size)
 }
 
 
-CML_Error CML_Calloc(void ** ptr, uint32_t size)
+CML_Error (CML_Calloc)(void ** ptr, uint32_t size)
 {
     CHECKPTR(ptr);
 
@@ -47,7 +47,7 @@ CML_Error CML_Calloc(void ** ptr, uint32_t size)
 }
 
 
-CML_Error CML_Realloc(void ** ptr, uint32_t size)
+CML_Error (CML_Realloc)(void ** ptr, uint32_t size)
 {
     CHECKPTR(ptr);
 
@@ -59,7 +59,7 @@ CML_Error CML_Realloc(void ** ptr, uint32_t size)
 }
 
 
-CML_Error CML_Free(void ** ptr)
+CML_Error (CML_Free)(void ** ptr)
 {
     CHECKPTR(ptr);
 

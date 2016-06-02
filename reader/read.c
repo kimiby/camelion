@@ -117,7 +117,7 @@ static CML_Error string_arrow(char ** storable)
 
 static CML_Error string_realloc(char ** string, uint32_t * size, char symbol)
 {
-    CHECKERR(CML_Realloc((void **)string, *size + 1));
+    CHECKERR(CML_Realloc(string, *size + 1));
 
     (*string)[*size] = symbol;
     *size += 1;
@@ -155,7 +155,7 @@ CML_Error CML_FromFile(char * filename, char ** result)
         return CML_ERROR_USER_CANTSEEKFILE;
     }
 
-    CHECKERC(CML_Calloc((void **)result, fsize + 1),
+    CHECKERC(CML_Calloc(result, fsize + 1),
              fclose(file));
 
     if (fread(*result, 1, fsize, file) != (uint32_t)fsize)
@@ -301,7 +301,7 @@ static CML_Error CML_NodeReadValue(CML_Node * root, char ** storable)
             }
         }
 
-        CHECKERR(CML_Free((void **)&value));
+        CHECKERR(CML_Free(&value));
     }
 
     return CML_ERROR_SUCCESS;
@@ -326,7 +326,7 @@ static CML_Error CML_NodeReadName(CML_Node * root, char ** storable)
             CHECKERR(string_symbol(storable, &symbol));
             if (namecaret > 255)
             {
-                CHECKERR(CML_Free((void **)&root->name));
+                CHECKERR(CML_Free(&root->name));
                 return CML_ERROR_USER_BADNAME;
             }
         }
@@ -391,7 +391,7 @@ CML_Error CML_StorableFromString(char * storable, CML_Node ** result)
     CHECKPTR(result);
 
     char * data;
-    CHECKERR(CML_Malloc((void **)&data, strlen(storable) + 1));
+    CHECKERR(CML_Malloc(&data, strlen(storable) + 1));
 
     char * olddata = data;
     strcpy(data, storable);
@@ -414,11 +414,11 @@ CML_Error CML_StorableFromString(char * storable, CML_Node ** result)
     }
 
     CHECKERC(CML_NodeCreate(roottype, result),
-             CML_Free((void **)&olddata));
+             CML_Free(&olddata));
 
     CHECKERC(CML_NodeParse (*result, &data),
-             CML_Free((void **)&olddata));
-    CHECKERR(CML_Free((void **)&olddata));
+             CML_Free(&olddata));
+    CHECKERR(CML_Free(&olddata));
 
     return CML_ERROR_SUCCESS;
 }
@@ -435,8 +435,8 @@ CML_Error CML_StorableFromFile(char * filename, CML_Node ** result)
         return CML_ERROR_USER_BADSTRING;
 
     CHECKERC(CML_StorableFromString(buffer, result),
-             CML_Free((void **)&buffer));
-    CHECKERR(CML_Free((void **)&buffer));
+             CML_Free(&buffer));
+    CHECKERR(CML_Free(&buffer));
 
     return CML_ERROR_SUCCESS;
 }

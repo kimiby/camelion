@@ -28,7 +28,7 @@
 
 CML_Error CML_SerialWriteUINT8(CML_Bytes * bytes, uint8_t value)
 {
-    CHECKERR(CML_Realloc((void **)&bytes->data, bytes->size + sizeof(uint8_t)));
+    CHECKERR(CML_Realloc(&bytes->data, bytes->size + sizeof(uint8_t)));
 
     bytes->data[bytes->size++] = value;
 
@@ -37,7 +37,7 @@ CML_Error CML_SerialWriteUINT8(CML_Bytes * bytes, uint8_t value)
 
 CML_Error CML_SerialWriteUINT32(CML_Bytes * bytes, uint32_t value)
 {
-    CHECKERR(CML_Realloc((void **)&bytes->data, bytes->size + sizeof(uint32_t)));
+    CHECKERR(CML_Realloc(&bytes->data, bytes->size + sizeof(uint32_t)));
 
     bytes->data[bytes->size++] = (value >> 0x18) & 0xFF;
     bytes->data[bytes->size++] = (value >> 0x10) & 0xFF;
@@ -49,7 +49,7 @@ CML_Error CML_SerialWriteUINT32(CML_Bytes * bytes, uint32_t value)
 
 CML_Error CML_SerialWriteINT32 (CML_Bytes * bytes, int32_t  value)
 {    
-    CHECKERR(CML_Realloc((void **)&bytes->data, bytes->size + sizeof(uint32_t)));
+    CHECKERR(CML_Realloc(&bytes->data, bytes->size + sizeof(uint32_t)));
 
     bytes->data[bytes->size++] = (value >> 0x18) & 0xFF;
     bytes->data[bytes->size++] = (value >> 0x10) & 0xFF;
@@ -63,7 +63,7 @@ CML_Error CML_SerialWriteString(CML_Bytes * bytes, char * value)
 {
     uint32_t len = strlen(value);
 
-    CHECKERR(CML_Realloc((void **)&bytes->data, bytes->size + len));
+    CHECKERR(CML_Realloc(&bytes->data, bytes->size + len));
 
     memcpy(&bytes->data[bytes->size], value, len);
 
