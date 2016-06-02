@@ -203,3 +203,15 @@ CML_Error CML_NodeInsert(CML_Node * node, CML_Node * child, uint32_t pos)
 
     return CML_ERROR_SUCCESS;
 }
+
+
+CML_Error CML_NodeRemoveAll(CML_Node * node)
+{
+    CHECKPTR(node);
+    CHECKJAR(node);
+
+    while (node->ncount)
+        CHECKERR(CML_NodeRemove(node, 0));
+
+    return CML_ERROR_SUCCESS;
+}

@@ -30,6 +30,7 @@
 /* E */ CML_Error CML_NodeFree      (CML_Node ** node);
 /* E */ CML_Error CML_NodeCopy      (CML_Node *  node, CML_Node **  dest, CML_Bool recursive);
 /* E */ CML_Error CML_NodeRemove    (CML_Node *  node, uint32_t    index);
+/* E */ CML_Error CML_NodeRemoveAll (CML_Node *  node);
 /* E */ CML_Error CML_NodeAppend    (CML_Node *  node, CML_Node *  child);
 /* E */ CML_Error CML_NodeInsert    (CML_Node *  node, CML_Node *  child, uint32_t pos);
 
