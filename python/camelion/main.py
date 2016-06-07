@@ -1,6 +1,8 @@
 from ctypes import *
 import json
-camelion = CDLL("../[bin]/libcamelion.dylib")
+import platform
+
+camelion = CDLL("libcamelion.{}".format("so" if platform.uname()[0] != "Darwin" else "dylib"))
 
 
 class Data(Union):
@@ -113,4 +115,4 @@ def nfreeze(data):
     camelion.CML_DataFree(byref(b))
     camelion.CML_NodeFree(byref(node))
 
-    return res
+    return res.decode("hex")
